@@ -8,11 +8,14 @@ import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
+
+import static com.terraformersmc.modmenu.ModMenu.GSON;
 
 public class HearthguardConfig {
     public enum Mode implements Supplier<Mode> { WHITELIST, BLACKLIST;
@@ -76,4 +79,22 @@ public class HearthguardConfig {
             return !mobs.contains(idStr);
         }
     }
+
+    public void save() {
+        try {
+            Path configDir = FabricLoader.getInstance().getConfigDir().resolve("hearthguard");
+            Files.createDirectories(configDir);
+            Path file = configDir.resolve("moblist.json");
+
+            // Keep the string in sync
+            if (modeEnum != null) mode = modeEnum.name();
+
+            try (Writer writer = Files.newBufferedWriter(file)) {
+                GSON.toJson(this, writer);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
