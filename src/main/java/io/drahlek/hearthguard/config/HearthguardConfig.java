@@ -12,14 +12,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class HearthguardConfig {
-    public enum Mode { WHITELIST, BLACKLIST }
+    public enum Mode implements Supplier<Mode> { WHITELIST, BLACKLIST;
+
+        @Override
+        public Mode get() {
+            return null;
+        }
+    }
 
     public String mode;
     public Set<String> mobs = new HashSet<>();
 
-    private Mode modeEnum;
+    public Mode modeEnum;
 
     private static HearthguardConfig INSTANCE;
 

@@ -20,6 +20,9 @@
 		],
 		"client": [
 			"io.drahlek.hearthguard.HearthguardClient"
+		],
+		"modmenu": [
+			"io.drahlek.hearthguard.config.HearthguardModMenu"
 		]
 	},
 	"mixins": [
