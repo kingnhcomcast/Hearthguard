@@ -5,33 +5,135 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.CycleButton;
+import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import org.jspecify.annotations.NonNull;
 
+//TODO add 'reset default' button
+//TODO add range config - when the start fleeing, how far they flee
+//TODO add slow/fast walk speed config
 public class HearthguardConfigScreen extends Screen {
-
-    private MobList mobList;
+    private static final int LEFT_MARGIN = 40;
+    private static final int RIGHT_MARGIN = 40;
+    private static final int TOP_MARGIN = 11;
+    private static final int BOTTOM_MARGIN = 11;
+    private static final int SPACING = 7;
+    private static final int WIDGET_HEIGHT = 20;
+    private static final int WIDGET_WIDTH = 150;
+    private static final int TOP_OFFSET = 31;
     private final Screen parent;
+    private MobList mobList;
 
     public HearthguardConfigScreen(Screen parent) {
         super(Component.literal("Mob Toggles"));
         this.parent = parent;
     }
 
+    private int calculateTop(int index) {
+        return (SPACING + WIDGET_HEIGHT) * (index - 1);
+    }
+
     @Override
     protected void init() {
         HearthguardConfig config = HearthguardConfig.getInstance();
 
-       // initWhiteListButton(config);
-
+        initHeader();
+        initWhiteListButton(config);
+        initRangeSlider(config);
+        initSlowSpeedSlider(config);
+        initFastSpeedSlider(config);
         initMobList();
-
+        initSelectAllCheckbox();
         initDone();
+    }
+
+    private void initFastSpeedSlider(HearthguardConfig config) {
+        NumberSliderButton slider = new NumberSliderButton(
+                "Flee Fast Speed",
+                this.width / 2,
+                calculateTop(3),
+                WIDGET_WIDTH,
+                WIDGET_HEIGHT,
+                config.fleeFastSpeed,
+                0.1,   // min
+                2.0,  // max
+                false,
+                0.1,
+                newValue -> {
+                    config.fleeFastSpeed = newValue;
+                }
+        );
+
+        this.addRenderableWidget(slider);
+    }
+
+    private void initSlowSpeedSlider(HearthguardConfig config) {
+        NumberSliderButton slider = new NumberSliderButton(
+                "Flee Slow Speed",
+                LEFT_MARGIN,
+                calculateTop(3),
+                WIDGET_WIDTH,
+                WIDGET_HEIGHT,
+                config.fleeSlowSpeed,
+                0.1,   // min
+                2.0,  // max
+                false,
+                0.1,
+                newValue -> {
+                    config.fleeSlowSpeed = newValue;
+                }
+        );
+
+        this.addRenderableWidget(slider);
+    }
+
+    private void initRangeSlider(HearthguardConfig config) {
+        NumberSliderButton slider = new NumberSliderButton(
+                "Range",
+                this.width / 2,
+                calculateTop(2),
+                WIDGET_WIDTH,
+                WIDGET_HEIGHT,
+                config.range,   // initial value
+                3,   // min
+                32,  // max
+                true,
+                1.0,
+                newValue -> {
+                    config.range = (int) newValue;
+                }
+        );
+
+        this.addRenderableWidget(slider);
+    }
+
+    private void initHeader() {
+        String text = "HearthGuard Options";
+        int width = this.font.width(text);
+
+        this.addRenderableWidget(
+                new StringWidget(
+                        (this.width / 2) - (width / 2),
+                        TOP_MARGIN,
+                        width,
+                        9,
+                        Component.literal(text),
+                        this.font
+                )
+        );
+    }
+
+    private void initSelectAllCheckbox() {
+        this.addRenderableWidget(
+                new SelectAllWidget(LEFT_MARGIN, calculateTop(4), WIDGET_WIDTH, WIDGET_HEIGHT)
+        );
     }
 
     private void initDone() {
@@ -46,16 +148,17 @@ public class HearthguardConfigScreen extends Screen {
     }
 
     private void initMobList() {
-        int listTop = 40;
-        int listHeight = this.height - 80;
-        int entryHeight = 24;
+        int x = LEFT_MARGIN;
+        int y = calculateTop(5);
+        int width = this.width - LEFT_MARGIN - RIGHT_MARGIN;
+        int height = this.height - BOTTOM_MARGIN - calculateTop(6);//  140;
 
         mobList = new MobList(
                 this.minecraft,
-                this.width,
-                listHeight,
-                listTop,
-                entryHeight
+                x,     //x
+                y,     //y
+                5,     //width
+                20     //height
         );
 
         // Loop over all entity types in the registry
@@ -63,7 +166,6 @@ public class HearthguardConfigScreen extends Screen {
             if (type.getCategory() != MobCategory.MONSTER) continue;
 
             Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
-            if (id == null) continue;
 
             String idString = id.toString();
             boolean selected = HearthguardConfig.getInstance().mobs.contains(idString);
@@ -72,7 +174,7 @@ public class HearthguardConfigScreen extends Screen {
         }
 
         // Ensure entries are properly positioned
-        mobList.updateSizeAndPosition(this.width, listHeight, listTop, 0);
+        mobList.updateSizeAndPosition(width, height, x, y);
 
         this.addRenderableWidget(mobList);
     }
@@ -85,9 +187,11 @@ public class HearthguardConfigScreen extends Screen {
                         config.modeEnum
                 )
                         .withValues(HearthguardConfig.Mode.values())
-                        .create(
-                                this.width / 2 - 75, this.height / 2 - 10,
-                                150, 20,
+                        .create( //x, y, width, height
+                                LEFT_MARGIN, // this.width / 2 - 75,
+                                calculateTop(2), //TOP_MARGIN + SPACING,
+                                WIDGET_WIDTH,
+                                20,
                                 Component.literal("Mode"),
                                 (button, value) -> {
                                     config.modeEnum = value;
@@ -98,21 +202,21 @@ public class HearthguardConfigScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void render(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick); // automatically calls proper background
     }
 
     // =========================
     // Mob List
     // =========================
-    private class MobList extends AbstractSelectionList<MobList.MobEntry> {
+    private static class MobList extends AbstractSelectionList<MobList.MobEntry> {
 
-        public MobList(Minecraft minecraft, int width, int height, int top, int entryHeight) {
-            super(minecraft, width, height, top, entryHeight);
+        public MobList(Minecraft minecraft, int x, int y, int width, int height) {
+            super(minecraft, x, y, width, height);
         }
 
         @Override
-        public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
+        public void updateWidgetNarration(@NonNull NarrationElementOutput narrationElementOutput) {
             // No custom narration needed
         }
 
@@ -131,10 +235,49 @@ public class HearthguardConfigScreen extends Screen {
             this.addEntry(new MobEntry(name, selected));
         }
 
+        @Override
+        public boolean mouseClicked(MouseButtonEvent event, boolean consumed) {
+            double mouseX = event.x();
+            double mouseY = event.y();
+
+            // Find the entry under the mouse
+            MobEntry entry = this.getEntryAtPosition(mouseX, mouseY);
+            if (entry != null) {
+                entry.selected = !entry.selected;
+
+                HearthguardConfig config = HearthguardConfig.getInstance();
+                if (entry.selected) config.mobs.add(entry.displayName);
+                else config.mobs.remove(entry.displayName);
+
+                // return true; // event handled
+            }
+
+            // Otherwise, let super handle scrolling etc.
+            return super.mouseClicked(event, consumed);
+        }
+
+        public boolean areAllSelected() {
+            for (MobEntry entry : this.children()) {
+                if (!entry.selected) return false;
+            }
+            return !this.children().isEmpty();
+        }
+
+        public void setAllSelected(boolean value) {
+            HearthguardConfig config = HearthguardConfig.getInstance();
+
+            for (MobEntry entry : this.children()) {
+                entry.selected = value;
+
+                if (value) config.mobs.add(entry.displayName);
+                else config.mobs.remove(entry.displayName);
+            }
+        }
+
         // =========================
         // Single Entry
         // =========================
-        private class MobEntry extends Entry<MobEntry> {
+        private static class MobEntry extends Entry<MobEntry> {
             private final String displayName;
             private boolean selected;
 
@@ -147,53 +290,102 @@ public class HearthguardConfigScreen extends Screen {
 
             @Override
             public void renderContent(GuiGraphics guiGraphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
-                // Draw a red rectangle for each entry
-//                guiGraphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x80FF0000);
-//
-                guiGraphics.drawString(Minecraft.getInstance().font, displayName,
-                        getContentX(), getContentY(), 0xFFFFFFFF);
+                int checkboxSize = 12;
+                int padding = 4;
 
+                // Draw the checkbox (left side)
+                int checkboxX = getContentX();
+                int checkboxY = getContentY() + (getContentHeight() - checkboxSize) / 2;
 
-                // Draw a light gray background for the entry
-                guiGraphics.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x80000000);
+                // Draw checkbox background
+                guiGraphics.fill(
+                        checkboxX, checkboxY,
+                        checkboxX + checkboxSize, checkboxY + checkboxSize,
+                        0xFF555555 // dark gray border
+                );
 
-                // Draw the mob name, inset by a few pixels
-//                guiGraphics.drawString(
-//                        Minecraft.getInstance().font,
-//                        displayName,
-//                        getX() + 4, // small padding from left
-//                        getY() + (getHeight() - Minecraft.getInstance().font.lineHeight) / 2, // vertically centered
-//                        0xFFFFFF
-//                );
-
-                // Draw selection highlight
+                // Fill the checkbox if selected
                 if (selected) {
                     guiGraphics.fill(
-                            getX() + 1,
-                            getY() + 1,
-                            getX() + getWidth() - 1,
-                            getY() + getHeight() - 1,
-                            0x8000FF00 // translucent green
+                            checkboxX + 2, checkboxY + 2,
+                            checkboxX + checkboxSize - 2, checkboxY + checkboxSize - 2,
+                            0xFF00FF00 // green
                     );
                 }
+
+                // Draw the mob name to the right of the checkbox
+                guiGraphics.drawString(
+                        Minecraft.getInstance().font,
+                        displayName,
+                        checkboxX + checkboxSize + padding,
+                        getContentY() + (getContentHeight() - Minecraft.getInstance().font.lineHeight) / 2,
+                        0xFFFFFFFF // white text
+                );
             }
 
-           // @Override
-            public boolean mouseClicked(double mouseX, double mouseY, int button) {
-                if (isMouseOver(mouseX, mouseY)) {
-                    selected = !selected;
 
-                    String id = displayName;
-                    HearthguardConfig config = HearthguardConfig.getInstance();
-                    if (selected) {
-                        config.mobs.add(id);
-                    } else {
-                        config.mobs.remove(id);
-                    }
-                    return true;
-                }
-                return false;
+        }
+    }
+
+    private class SelectAllWidget extends Button {
+        private final int x;
+        private final int y;
+
+        public SelectAllWidget(int x, int y, int width, int height) {
+            super(
+                    x,
+                    y,
+                    width,
+                    height,
+                    Component.literal(""), // text handled in renderWidget
+                    button -> {            // onPress
+                        if (mobList != null) {
+                            boolean allSelected = mobList.areAllSelected();
+                            mobList.setAllSelected(!allSelected);
+                        }
+                    },
+                    button -> Component.literal("") // CreateNarration: just empty
+            );
+            this.x = x;
+            this.y = y;
+        }
+
+        @Override
+        public void renderContents(@NonNull GuiGraphics graphics, int mouseX, int mouseY, float delta) {
+            // Draw the checkbox
+            boolean allSelected = mobList != null && mobList.areAllSelected();
+
+            int checkboxSize = 12;
+            int padding = 4;
+
+            int checkboxX = this.x;
+            int checkboxY = this.y + (this.height - checkboxSize) / 2;
+
+            // border
+            graphics.fill(
+                    checkboxX, checkboxY,
+                    checkboxX + checkboxSize, checkboxY + checkboxSize,
+                    0xFF555555
+            );
+
+            // fill if selected
+            if (allSelected) {
+                graphics.fill(
+                        checkboxX + 2, checkboxY + 2,
+                        checkboxX + checkboxSize - 2, checkboxY + checkboxSize - 2,
+                        0xFF00FF00
+                );
             }
+
+            // label matching list style
+            String label = allSelected ? "Deselect All" : "Select All";
+            graphics.drawString(
+                    Minecraft.getInstance().font,
+                    Component.literal(label),
+                    checkboxX + checkboxSize + padding,
+                    this.y + (this.height - Minecraft.getInstance().font.lineHeight) / 2,
+                    0xFFFFFFFF
+            );
         }
     }
 }

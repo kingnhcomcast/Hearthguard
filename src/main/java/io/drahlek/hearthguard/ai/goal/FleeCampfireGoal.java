@@ -34,9 +34,7 @@ public class FleeCampfireGoal extends Goal {
     @Override
     public boolean canUse() {
         nearestFire = findNearestLitCampfire();
-        boolean foundCampfire = nearestFire != null;
-        if(foundCampfire) log("Found lit campfire");
-        return foundCampfire;
+        return nearestFire != null;
     }
 
     @Override
@@ -51,11 +49,6 @@ public class FleeCampfireGoal extends Goal {
         if (target != null) {
             mob.getNavigation().moveTo(target.x, target.y, target.z, fastSpeed);
         }
-
-
-        log("Setting navigation to %s".formatted(target));
-
-
     }
 
     @Override
@@ -86,11 +79,10 @@ public class FleeCampfireGoal extends Goal {
 
     @Override
     public void tick() {
-        if (this.mob.distanceToSqr(nearestFire.getCenter()) < radius) {
+        double distance = this.mob.distanceToSqr(nearestFire.getCenter());
+        if (this.mob.distanceToSqr(nearestFire.getCenter()) < (radius * radius)) {
             this.mob.getNavigation().setSpeedModifier(this.fastSpeed);
-            log("running");
         } else {
-            log("walking");
             this.mob.getNavigation().setSpeedModifier(this.slowSpeed);
         }
     }

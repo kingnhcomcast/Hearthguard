@@ -19,14 +19,15 @@ public class MonsterMixin extends PathfinderMob {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void hearthguard_addCampfireFear(CallbackInfo ci) {
+        HearthguardConfig config = HearthguardConfig.getInstance();
         if (level().dimension() != Level.OVERWORLD) {
             return;
         }
 
-        if (!HearthguardConfig.getInstance().shouldApply(getType())) {
+        if (!config.shouldApply(getType())) {
             return;
         }
 
-        this.goalSelector.addGoal(1, new FleeCampfireGoal(this, 8.0F, 1.0D, 1.2D));
+        this.goalSelector.addGoal(1, new FleeCampfireGoal(this, config.range, config.fleeFastSpeed, config.fleeSlowSpeed));
     }
 }

@@ -1,4 +1,7 @@
 {
+  "range": 8,
+  "flee_fast_speed": 1.2,
+  "flee_slow_speed": 1.0,
   "mode": "WHITELIST",
   "mobs": [
     "minecraft:zombie",

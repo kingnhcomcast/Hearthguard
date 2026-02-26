@@ -1,10 +1,10 @@
 package io.drahlek.hearthguard.config;
 
-import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -18,20 +18,15 @@ import java.util.function.Supplier;
 import static com.terraformersmc.modmenu.ModMenu.GSON;
 
 public class HearthguardConfig {
-    public enum Mode implements Supplier<Mode> { WHITELIST, BLACKLIST;
-
-        @Override
-        public Mode get() {
-            return null;
-        }
-    }
-
+    private static HearthguardConfig INSTANCE;
     public String mode;
     public Set<String> mobs = new HashSet<>();
-
-    public Mode modeEnum;
-
-    private static HearthguardConfig INSTANCE;
+    public transient Mode modeEnum;
+    public int range;
+    @SerializedName("flee_fast_speed")
+    public double fleeFastSpeed;
+    @SerializedName("flee_slow_speed")
+    public double fleeSlowSpeed;
 
     public static HearthguardConfig getInstance() {
         return INSTANCE;
@@ -40,18 +35,17 @@ public class HearthguardConfig {
     public static void init() {
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir();
-            Path file = configDir.resolve("hearthguard/moblist.json");
+            Path file = configDir.resolve("hearthguard/config.json");
 
             if (!Files.exists(file)) {
                 Files.createDirectories(file.getParent());
-                try (InputStream in = HearthguardConfig.class.getResourceAsStream("/assets/hearthguard/moblist.json")) {
+                try (InputStream in = HearthguardConfig.class.getResourceAsStream("/assets/hearthguard/config.json")) {
                     if (in != null) Files.copy(in, file);
                 }
             }
 
             try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(file))) {
-                Gson gson = new Gson();
-                INSTANCE = gson.fromJson(reader, HearthguardConfig.class);
+                INSTANCE = GSON.fromJson(reader, HearthguardConfig.class);
                 if (INSTANCE == null) INSTANCE = new HearthguardConfig();
                 if (INSTANCE.mobs == null) INSTANCE.mobs = new HashSet<>();
 
@@ -84,7 +78,7 @@ public class HearthguardConfig {
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir().resolve("hearthguard");
             Files.createDirectories(configDir);
-            Path file = configDir.resolve("moblist.json");
+            Path file = configDir.resolve("config.json");
 
             // Keep the string in sync
             if (modeEnum != null) mode = modeEnum.name();
@@ -94,6 +88,15 @@ public class HearthguardConfig {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public enum Mode implements Supplier<Mode> {
+        WHITELIST, BLACKLIST;
+
+        @Override
+        public Mode get() {
+            return null;
         }
     }
 
