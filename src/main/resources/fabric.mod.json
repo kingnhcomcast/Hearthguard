@@ -3,7 +3,7 @@
   "id": "hearthguard",
   "version": "${version}",
   "name": "Hearthguard",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Causes some hostile mobs to flee a lit campfire.",
   "authors": [
     "Me!"
   ],

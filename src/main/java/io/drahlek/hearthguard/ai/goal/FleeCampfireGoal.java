@@ -5,9 +5,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +37,11 @@ public class FleeCampfireGoal extends Goal {
     @Override
     public boolean canUse() {
         nearestFire = findNearestLitCampfire();
-        return nearestFire != null;
+        if(nearestFire != null) {
+            return hasLineOfSight(nearestFire);
+        }
+
+        return false;
     }
 
     @Override
@@ -75,6 +82,23 @@ public class FleeCampfireGoal extends Goal {
         }
 
         return null;
+    }
+
+    private boolean hasLineOfSight(BlockPos pos) {
+        Vec3 start = mob.getEyePosition();
+        Vec3 end = Vec3.atCenterOf(pos);
+
+        BlockHitResult result = mob.level().clip(
+                new ClipContext(
+                        start,
+                        end,
+                        ClipContext.Block.COLLIDER,
+                        ClipContext.Fluid.NONE,
+                        mob
+                )
+        );
+
+        return result.getType() == HitResult.Type.MISS || result.getBlockPos().equals(pos);
     }
 
     @Override

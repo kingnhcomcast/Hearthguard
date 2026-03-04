@@ -11,7 +11,7 @@ public class NumberSliderButton extends AbstractSliderButton {
     private final String label;
     private final double step;
     private double currentValue;
-    private boolean wholeNumber;
+    private final boolean wholeNumber;
 
     public NumberSliderButton(String label, int x, int y, int width, int height, double initialValue, double min, double max, boolean wholeNumber, double step, ValueChangedListener listener) {
         super(x, y, width, height, Component.literal(""), initialValue);
@@ -60,14 +60,4 @@ public class NumberSliderButton extends AbstractSliderButton {
     public interface ValueChangedListener {
         void onValueChanged(double newValue);
     }
-
-//    public int getInitiaValue() {
-//        return initialValue;
-//    }
-//
-//    public void setInitiaValue(int initiaValue) {
-//        this.initialValue = Math.max(min, Math.min(max, initiaValue));
-//        this.setValue((double)(this.initialValue - min) / (max - min));
-//        updateMessage();
-//    }
 }

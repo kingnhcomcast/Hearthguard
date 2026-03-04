@@ -3,7 +3,6 @@
   "package": "io.drahlek.hearthguard.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ExampleMixin",
     "MonsterMixin"
   ],
   "injectors": {

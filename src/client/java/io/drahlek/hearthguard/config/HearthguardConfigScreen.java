@@ -17,8 +17,6 @@ import net.minecraft.world.entity.MobCategory;
 import org.jspecify.annotations.NonNull;
 
 //TODO add 'reset default' button
-//TODO add range config - when the start fleeing, how far they flee
-//TODO add slow/fast walk speed config
 public class HearthguardConfigScreen extends Screen {
     private static final int LEFT_MARGIN = 40;
     private static final int RIGHT_MARGIN = 40;
