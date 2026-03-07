@@ -20,7 +20,8 @@ repositories {
 		name = "Terraformers"
 		url = "https://maven.terraformersmc.com/"
 	}
-}
+	maven { url "https://maven.shedaniel.me/" }
+	maven { url "https://maven.terraformersmc.com/releases/" }}
 
 loom {
 	splitEnvironmentSourceSets()
@@ -45,6 +46,16 @@ dependencies {
 
 	// Mod Menu API
 	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+	modApi("me.shedaniel.cloth:cloth-config-fabric:21.11.153") {
+		exclude(group: "net.fabricmc.fabric-api")
+	}
+
+//	compileOnly "org.projectlombok:lombok:${project.lombok_version}"
+//	annotationProcessor "org.projectlombok:lombok:${project.lombok_version}"
+//
+//	testCompileOnly "org.projectlombok:lombok:${project.lombok_version}"
+//	testAnnotationProcessor "org.projectlombok:lombok:${project.lombok_version}"
 }
 
 processResources {

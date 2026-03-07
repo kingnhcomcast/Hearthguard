@@ -13,74 +13,125 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
-
-import static com.terraformersmc.modmenu.ModMenu.GSON;
 
 public class HearthguardConfig {
-    private static HearthguardConfig INSTANCE;
-    public String mode;
-    public Set<String> mobs = new HashSet<>();
-    public transient Mode modeEnum;
-    public int range;
-    @SerializedName("flee_fast_speed")
-    public double fleeFastSpeed;
-    @SerializedName("flee_slow_speed")
-    public double fleeSlowSpeed;
 
+    private static final com.google.gson.Gson GSON = new com.google.gson.GsonBuilder()
+            .setPrettyPrinting()
+            .create();
+
+    private static HearthguardConfig INSTANCE;
+
+
+    private String mode;
+    private Set<String> mobs = new HashSet<>();
+    private transient Mode modeEnum;
+    private int range = 8;
+    @SerializedName("flee_fast_speed")
+    private double fleeFastSpeed = 1.2;
+    @SerializedName("flee_slow_speed")
+    private double fleeSlowSpeed = 1.0;
+
+    // =====================
+    // Singleton access
+    // =====================
     public static HearthguardConfig getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new HearthguardConfig();
+            // initialize defaults here
+            INSTANCE.modeEnum = Mode.WHITELIST;
+            INSTANCE.mobs = new HashSet<>();
+            INSTANCE.range = 8;
+            INSTANCE.fleeFastSpeed = 1.2;
+            INSTANCE.fleeSlowSpeed = 1.0;
+        }
         return INSTANCE;
     }
 
     public static void init() {
+        Path configDir = FabricLoader.getInstance().getConfigDir().resolve("hearthguard");
+        Path file = configDir.resolve("config.json");
+
         try {
-            Path configDir = FabricLoader.getInstance().getConfigDir();
-            Path file = configDir.resolve("hearthguard/config.json");
-
-            if (!Files.exists(file)) {
-                Files.createDirectories(file.getParent());
-                try (InputStream in = HearthguardConfig.class.getResourceAsStream("/assets/hearthguard/config.json")) {
-                    if (in != null) Files.copy(in, file);
-                }
-            }
-
-            try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(file))) {
-                INSTANCE = GSON.fromJson(reader, HearthguardConfig.class);
-                if (INSTANCE == null) INSTANCE = new HearthguardConfig();
-                if (INSTANCE.mobs == null) INSTANCE.mobs = new HashSet<>();
-
-                if (INSTANCE.modeEnum == null && INSTANCE.mode != null) {
-                    try {
-                        INSTANCE.modeEnum = Mode.valueOf(INSTANCE.mode.toUpperCase());
-                    } catch (Exception e) {
-                        INSTANCE.modeEnum = Mode.WHITELIST; // fallback
-                    }
+            if (Files.exists(file)) {
+                try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(file))) {
+                    INSTANCE = GSON.fromJson(reader, HearthguardConfig.class);
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // If file didn't exist or loading failed, use defaults
+        if (INSTANCE == null) {
             INSTANCE = new HearthguardConfig();
         }
-    }
 
-    public boolean shouldApply(EntityType<?> type) {
-        Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
-
-        String idStr = id.toString(); // e.g. "minecraft:zombie"
-
-        if (modeEnum == Mode.WHITELIST) {
-            return mobs.contains(idStr);
-        } else {
-            return !mobs.contains(idStr);
+        if (INSTANCE.mode != null) {
+            try {
+                INSTANCE.modeEnum = Mode.valueOf(INSTANCE.mode);
+            } catch (IllegalArgumentException e) {
+                INSTANCE.modeEnum = Mode.WHITELIST;
+            }
         }
+
+        // Save once to ensure the directory and file exist for the player
+        INSTANCE.save();
     }
 
+    // =====================
+    // Getters / Setters
+    // =====================
+    public int getRange() {
+        return range;
+    }
+
+    public void setRange(int range) {
+        this.range = range;
+    }
+
+    public double getFleeFastSpeed() {
+        return fleeFastSpeed;
+    }
+
+    public void setFleeFastSpeed(double speed) {
+        this.fleeFastSpeed = speed;
+    }
+
+    public double getFleeSlowSpeed() {
+        return fleeSlowSpeed;
+    }
+
+    public void setFleeSlowSpeed(double speed) {
+        this.fleeSlowSpeed = speed;
+    }
+
+    public Mode getModeEnum() {
+        if (modeEnum == null) modeEnum = Mode.WHITELIST;
+        return modeEnum;
+    }
+
+    public void setModeEnum(Mode modeEnum) {
+        this.modeEnum = modeEnum;
+        this.mode = modeEnum.name();
+    }
+
+    public Set<String> getMobs() {
+        if (mobs == null) {
+            mobs = new HashSet<>();
+        }
+        return mobs;
+    }
+
+    // =====================
+    // JSON Save
+    // =====================
     public void save() {
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir().resolve("hearthguard");
             Files.createDirectories(configDir);
             Path file = configDir.resolve("config.json");
 
-            // Keep the string in sync
             if (modeEnum != null) mode = modeEnum.name();
 
             try (Writer writer = Files.newBufferedWriter(file)) {
@@ -91,13 +142,26 @@ public class HearthguardConfig {
         }
     }
 
-    public enum Mode implements Supplier<Mode> {
-        WHITELIST, BLACKLIST;
+    // =====================
+    // Utility
+    // =====================
+    public boolean shouldApply(EntityType<?> type) {
+        Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+        if (id == null) return false;
 
-        @Override
-        public Mode get() {
-            return null;
+        String idStr = id.toString();
+
+        if (getModeEnum() == Mode.WHITELIST) {
+            return mobs.contains(idStr);
+        } else {
+            return !mobs.contains(idStr);
         }
     }
 
+    // =====================
+    // Mode enum
+    // =====================
+    public enum Mode {
+        WHITELIST, BLACKLIST
+    }
 }

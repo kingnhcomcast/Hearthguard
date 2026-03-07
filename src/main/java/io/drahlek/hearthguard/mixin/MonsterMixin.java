@@ -28,6 +28,6 @@ public class MonsterMixin extends PathfinderMob {
             return;
         }
 
-        this.goalSelector.addGoal(1, new FleeCampfireGoal(this, config.range, config.fleeFastSpeed, config.fleeSlowSpeed));
+        this.goalSelector.addGoal(1, new FleeCampfireGoal(this, config.getRange(), config.getFleeFastSpeed(), config.getFleeSlowSpeed()));
     }
 }
