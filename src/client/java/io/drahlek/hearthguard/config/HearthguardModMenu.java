@@ -14,15 +14,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class HearthguardModMenu implements ModMenuApi {
-    Screen parent;
+    private static Map<String, List<EntityType<?>>> mobsByMod = null;
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
@@ -30,101 +31,110 @@ public class HearthguardModMenu implements ModMenuApi {
     }
 
     private Screen createConfigScreen(Screen parent) {
-        this.parent = parent;
-
         HearthguardConfig config = HearthguardConfig.getInstance();
-
         HearthguardConfig.Mode currentMode = config.getModeEnum() != null
                 ? config.getModeEnum() : HearthguardConfig.Mode.WHITELIST;
-
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
                 .setTitle(Component.literal("HearthGuard Options"));
-
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
-        // ===== General Settings =====
+        //build general tab
         buildGeneralTab(builder, entryBuilder, config, currentMode);
 
-        Map<String, List<String>> mobsByMod = new HashMap<>();
+        //generate map of mobs per mod
+        Map<String, List<EntityType<?>>> mobsByMod = getMobsByMod();
 
-        for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
-            if (type.getCategory() != MobCategory.MONSTER)
-                continue;
-
-            Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
-
-            //String modid = BuiltInRegistries.ENTITY_TYPE.getKey(type).getNamespace();
-            String modid = key.getNamespace();
-            ModContainer mod = FabricLoader.getInstance().getModContainer(modid).orElse(null);
-            if (mod != null) {
-                modid = mod.getMetadata().getName(); // "Minecraft" or "Better Animals"
-            }
-
-            String name = type.getDescription().getString();
-
-            mobsByMod.computeIfAbsent(modid, k -> new ArrayList<>()).add(name);
-        }
-
-        List<String> sortedMods = new ArrayList<>(mobsByMod.keySet());
-        Collections.sort(sortedMods);
-
-        for (String modid : sortedMods) {
-
-            // ===== Mob List =====
-            Map<String, BooleanListEntry> mobEntries = new HashMap<>();
-
-            ConfigCategory modCategory = builder.getOrCreateCategory(Component.literal(modid));
-
-            for (String mobName : mobsByMod.get(modid)) {
-
-                String idString = mobName;
-                boolean selected = config.getMobs().contains(idString);
-
-                BooleanListEntry entry =
-                        entryBuilder.startBooleanToggle(Component.literal(idString), selected)
-                                .setDefaultValue(false)
-                                .setSaveConsumer(sel -> {
-                                    if (sel) {
-                                        config.getMobs().add(idString);
-                                    }
-                                    else {
-                                        config.getMobs().remove(idString);
-                                    }
-                                })
-                                .build();
-
-                mobEntries.put(idString, entry);
-
-                modCategory.addEntry(entry);
-            }
-
-            boolean allSelected = !mobEntries.isEmpty() && mobEntries.values().stream().allMatch(BooleanListEntry::getValue);
-            String label = allSelected ? "Deselect All" : "Select All";
-            ButtonEntry toggleBtn = new ButtonEntry(Component.literal(label), !allSelected, (shouldSelect) -> {
-                // 1. Update the actual config data immediately
-                if (shouldSelect) {
-                    config.getMobs().addAll(getMobIds()); // Helper you already have
-                } else {
-                    config.getMobs().clear();
-                }
-
-                // 2. Cloth Config doesn't know the data changed.
-                // We MUST tell the entries to look at the config again.
-                mobEntries.forEach((id, entry) -> {
-                    setBooleanEntryValue(entry, shouldSelect);
-                });
-            });
-
-            modCategory.getEntries().add(0, toggleBtn);
+        //for each mod, build a tab of mobs
+        for (String modid : mobsByMod.keySet()) {
+            buildMobSelectionTab(modid, builder, mobsByMod, config, entryBuilder);
         }
 
         // Save config when pressing Done
         builder.setSavingRunnable(config::save);
 
-
-// Return the builder directly
         return builder.build();
+    }
+
+    private void buildMobSelectionTab(String modid, ConfigBuilder builder, Map<String, List<EntityType<?>>> mobsByMod, HearthguardConfig config, ConfigEntryBuilder entryBuilder) {
+        // ===== Mob List =====
+       List<BooleanListEntry> mobEntries = new ArrayList<>();
+
+        ConfigCategory modCategory = builder.getOrCreateCategory(Component.literal(modid));
+
+        for (EntityType<?> type : mobsByMod.get(modid)) {
+            String displayName = type.getDescription().getString();
+            String longName = BuiltInRegistries.ENTITY_TYPE.getKey(type).toString();
+
+            boolean selected = config.getMobs().contains(longName);
+
+            BooleanListEntry entry =
+                    entryBuilder.startBooleanToggle(Component.literal(displayName), selected)
+                            .setDefaultValue(false)
+                            .setSaveConsumer(sel -> {
+                                if (sel) {
+                                    config.getMobs().add(longName);
+                                }
+                                else {
+                                    config.getMobs().remove(longName);
+                                }
+                            })
+                            .build();
+
+            mobEntries.add(entry);
+            modCategory.addEntry(entry);
+        }
+
+        boolean allSelected = !mobEntries.isEmpty() && mobEntries.stream().allMatch(BooleanListEntry::getValue);
+        String label = allSelected ? "Deselect All" : "Select All";
+        ButtonEntry toggleBtn = new ButtonEntry(Component.literal(label), !allSelected, (shouldSelect) -> {
+            // 1. Update the actual config data immediately
+            List<EntityType<?>> mobs = mobsByMod.get(modid);
+            if (shouldSelect) {
+                mobs.forEach(mobType -> {
+                    config.getMobs().add(BuiltInRegistries.ENTITY_TYPE.getKey(mobType).toString());
+                });
+            } else {
+                mobs.forEach(mobType -> {
+                    config.getMobs().remove(BuiltInRegistries.ENTITY_TYPE.getKey(mobType).toString());
+                });
+            }
+
+            // 2. Cloth Config doesn't know the data changed.
+            // We MUST tell the entries to look at the config again.
+            mobEntries.forEach(entry -> {
+                setBooleanEntryValue(entry, shouldSelect);
+            });
+        });
+
+        modCategory.getEntries().addFirst(toggleBtn);
+    }
+
+    private static @NonNull Map<String, List<EntityType<?>>> getMobsByMod() {
+        if(mobsByMod == null) {
+            mobsByMod = new HashMap<>();
+
+            for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
+                if (type.getCategory() != MobCategory.MONSTER)
+                    continue;
+
+                Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+
+                String modid = key.getNamespace();
+                ModContainer mod = FabricLoader.getInstance().getModContainer(modid).orElse(null);
+                if (mod != null) {
+                    modid = mod.getMetadata().getName();
+                }
+                mobsByMod.computeIfAbsent(modid, k -> new ArrayList<>()).add(type);
+            }
+
+            //sort the lists
+            for (Map.Entry<String, List<EntityType<?>>> entry : mobsByMod.entrySet()) {
+                entry.getValue().sort(Comparator.comparing(type -> type.getDescription().getString()));
+            }
+        }
+
+        return mobsByMod;
     }
 
     private static void buildGeneralTab(ConfigBuilder builder, ConfigEntryBuilder entryBuilder, HearthguardConfig config, HearthguardConfig.Mode currentMode) {
@@ -161,17 +171,6 @@ public class HearthguardModMenu implements ModMenuApi {
                         .setSaveConsumer(config::setModeEnum)
                         .build()
         );
-    }
-
-    private List<String> getMobIds() {
-        List<String> ids = new ArrayList<>();
-        for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
-            if (type.getCategory() != MobCategory.MONSTER) continue;
-
-            ids.add(BuiltInRegistries.ENTITY_TYPE.getKey(type).toString());
-        }
-
-        return ids;
     }
 
     private void setBooleanEntryValue(BooleanListEntry entry, boolean value) {
