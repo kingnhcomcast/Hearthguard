@@ -8,7 +8,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.util.DefaultRandomPos;
+import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -24,23 +24,25 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.util.EnumSet;
 
-//BUG if they are far they might shiver, but never flee, just stay there
 public class FleeCampfireGoal extends Goal {
     public static final Logger LOGGER = LoggerFactory.getLogger(Hearthguard.MOD_ID);
+    private static final int STARTLED_TIME = 20;    //how long to stay startled
+    private static final int RECOVERY_TIME = 20;    //how long to wait after fleeing before mob can be started
 
     private final PathfinderMob mob;
     private final double fastSpeed;
     private final double slowSpeed;
-    private final float radius;
-    private boolean isFleeing = false;
+    private final int startleDistance;
+    private final int dangerDistance;
     private BlockPos nearestFire;
+    private FleeState fleeState = FleeState.IDLE;
+    private int stateTimer = 0;
 
-    //Variable to track the startle duration (20 ticks = 1 second)
-    private int startleTicks;
 
-    public FleeCampfireGoal(PathfinderMob mob, float radius, double fastSpeed, double slowSpeed) {
+    public FleeCampfireGoal(PathfinderMob mob, int startleDistance, double fastSpeed, double slowSpeed) {
         this.mob = mob;
-        this.radius = radius;
+        this.startleDistance = startleDistance;
+        this.dangerDistance = startleDistance * 2;
         this.fastSpeed = fastSpeed;
         this.slowSpeed = slowSpeed;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
@@ -48,8 +50,7 @@ public class FleeCampfireGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        // If we are already fleeing, don't try to "re-start" the goal
-        if (isFleeing) return false;
+        if (fleeState != FleeState.IDLE) return false;
 
         nearestFire = findNearestLitCampfire();
         if(nearestFire != null) {
@@ -61,10 +62,11 @@ public class FleeCampfireGoal extends Goal {
 
     @Override
     public void start() {
-        log("start");
-        this.isFleeing = true;
-        this.startleTicks = 20;
+        this.mob.getNavigation().stop();
 
+        fleeState = FleeState.STARTLED;
+        log(fleeState.name());
+        showFearParticles();
         playMobHurtSound(mob);
         recoil(mob);
         mob.setSilent(true);
@@ -73,44 +75,30 @@ public class FleeCampfireGoal extends Goal {
 
     @Override
     public void stop() {
-        log("stop");
-        this.isFleeing = false; // Unlock
         this.nearestFire = null;
         this.mob.getNavigation().stop();
-        this.startleTicks = 0;
         mob.setSilent(false);
+        stateTimer = 0;
+        fleeState = FleeState.IDLE;
+        log(fleeState.name());
     }
 
     @Override
     public boolean canContinueToUse() {
         // 1. If the fire is gone or unlit, we stop fleeing.
-        //TODO this will crash if the campfire has been broken - blockstate at nearesetFire is AIR and .LIT does not exist
-        if (nearestFire == null || !this.mob.level().getBlockState(nearestFire).getValue(CampfireBlock.LIT)) {
-            log("canContinueToUse false no campfire");
-            return false;
+        BlockState state = this.mob.level().getBlockState(nearestFire);
+        if (state.isAir() || !state.hasProperty(CampfireBlock.LIT) || !state.getValue(CampfireBlock.LIT)) {
+            return false; // Exit goal safely
         }
 
-        // 2. While we are in the startle phase, we MUST continue.
-        if (this.startleTicks > 0) {
-            return true;
-        }
-
-        // 3. Once startle is over, we stay in the goal as long as we are still
-        // within the danger radius, even if navigation is "thinking".
-        double distSqr = this.mob.distanceToSqr(Vec3.atCenterOf(nearestFire));
-        boolean stillInRange = distSqr < (radius * radius);
-
-        log("canContinueToUse: startleDone, inRange: %s, navDone: %s".formatted(stillInRange, mob.getNavigation().isDone()));
-
-        // Continue if we haven't finished moving OR if we are still too close to the fire
-        return stillInRange || !this.mob.getNavigation().isDone();
+        return fleeState != FleeState.IDLE;
     }
 
     private BlockPos findNearestLitCampfire() {
         BlockPos mobPos = mob.blockPosition();
         Level level = mob.level();
 
-        int r = (int) radius;
+        int r = (int) startleDistance;
 
         for (BlockPos pos : BlockPos.betweenClosed(
                 mobPos.offset(-r, -2, -r),
@@ -149,55 +137,79 @@ public class FleeCampfireGoal extends Goal {
         // 1. Safety check - if the fire was broken while fleeing
         if (this.nearestFire == null) return;
 
-        // 1. STARTLE PHASE (The "Frozen" Moment)
-        if (this.startleTicks > 0) {
-            this.startleTicks--;
-            showFearParticles();
-            shiver();
-            faceFire(mob);
-            this.mob.getNavigation().stop();
-        }
+        switch(fleeState) {
+            case IDLE -> {
+            }
+            case STARTLED -> {
+                shiver();
+                faceFire(mob);
+                if(++stateTimer >= STARTLED_TIME) {
+                    fleeState = FleeState.START_FLEEING;
+                    log(fleeState.name());
+                }
+            }
+            case START_FLEEING -> {
+                playMobHurtSound(mob);
+                jump();
+                dropItem();
+                showPoofParticles();
+                setFleeDestinationAndFlee();
+                fleeState = FleeState.FLEEING;
+                log(fleeState.name());
+            }
+            case FLEEING -> {
+                // Check if we are far enough away from the fire to stop fleeing
+                double distSqr = this.mob.distanceToSqr(Vec3.atCenterOf(nearestFire));
+                boolean stillInDanger = distSqr < (dangerDistance * dangerDistance);
 
-        // 2. TRANSITION: The moment they bolt
-        else if (this.startleTicks == 0) {
-            playMobHurtSound(mob);
-            jump();
-            dropItem();
-            showPoofParticles();
-            this.startleTicks--; // Set to -1 so this block only runs ONCE
-        } else {
-            flee();
+                // transition to recovering once out of danger
+                if (!stillInDanger) {
+                    fleeState = FleeState.RECOVERING;
+                    log(fleeState.name());
+                    stateTimer = 0;
+                }
+                //else if we are still in danger, but no longer moving, find another destination
+                else if(mob.getNavigation().isDone()) {
+                    setFleeDestinationAndFlee();
+                } else {
+                    flee();
+                }
+            }
+            case RECOVERING -> {
+                if(++stateTimer >= RECOVERY_TIME) {
+                    fleeState = FleeState.IDLE;
+                    log(fleeState.name());
+                }
+            }
         }
     }
 
     private void flee() {
-        // Only calculate a new path if we aren't already moving
-        if (this.mob.getNavigation().isDone()) {
-            Vec3 target = DefaultRandomPos.getPosAway(mob, 16, 7, Vec3.atCenterOf(nearestFire));
-            if (target != null) {
-                this.mob.getNavigation().moveTo(target.x, target.y, target.z, this.fastSpeed);
-            }
-        }
-
         // Handle Dynamic Speed
         double distSqr = this.mob.distanceToSqr(nearestFire.getCenter());
-        this.mob.getNavigation().setSpeedModifier(distSqr < (radius * radius) ? this.fastSpeed : this.slowSpeed);
 
-        // Handle Dynamic Looking (Occasional peeks back)
-        //TODO is this working
-        if (this.mob.tickCount % 40 == 0) {
-            // Look back at the fire every 2 seconds
-            log("look back at fire");
-            this.mob.getLookControl().setLookAt(Vec3.atCenterOf(nearestFire));
-        } else {
-            // Otherwise look where we are going
-            Vec3 moveVec = this.mob.getDeltaMovement();
-            if (moveVec.lengthSqr() > 0.01) {
-                this.mob.getLookControl().setLookAt(
-                        this.mob.getX() + moveVec.x,
-                        this.mob.getY() + this.mob.getEyeHeight(),
-                        this.mob.getZ() + moveVec.z
-                );
+        if(distSqr >= dangerDistance * dangerDistance) {
+            this.mob.getNavigation().stop();
+            fleeState = FleeState.RECOVERING;
+            log(fleeState.name());
+            stateTimer = 0;
+            return;
+        }
+
+        this.mob.getNavigation().setSpeedModifier(distSqr < (startleDistance * 1.5 * startleDistance * 1.5) ? this.fastSpeed : this.slowSpeed);
+    }
+
+    private void setFleeDestinationAndFlee() {
+        if (this.mob.getNavigation().isDone()) {
+            //Vec3 target = LandRandomPos.getPosAway(mob, 16, 7, Vec3.atCenterOf(nearestFire));
+            Vec3 target = findValidFleeTarget();
+
+            if (target != null) {
+                Boolean result = this.mob.getNavigation().moveTo(target.x, target.y, target.z, this.fastSpeed);
+            } else {
+                log("No target found");
+                fleeState = FleeState.RECOVERING;
+                log(fleeState.name());
             }
         }
     }
@@ -238,7 +250,7 @@ public class FleeCampfireGoal extends Goal {
                             stack
                     );
 
-                    // This is the key: 100 ticks = 5 seconds where NO ONE (especially the zombie) can pick it up
+                    // dont allow item pick up for 100 ticks, zombies might pick up what they just dropped
                     itemEntity.setPickUpDelay(100);
 
                     // Give it a little "toss" so it doesn't just sit under the mob's feet
@@ -252,11 +264,26 @@ public class FleeCampfireGoal extends Goal {
         }
     }
 
-    //TODO instead of jumping straight up, jump in direction they are going to flee
     private void jump() {
         if (this.mob.onGround()) {
-            log("jumping");
-            this.mob.jumpFromGround();
+            Vec3 firePos = Vec3.atCenterOf(nearestFire);
+            // 1. Direction: From the fire TO the mob
+            Vec3 awayDir = this.mob.position().subtract(firePos).normalize();
+
+            // 2. Strength: Horizontal leap + Vertical lift
+            double horizontalStrength = 0.5;
+            double verticalStrength = 0.42;
+
+            // 3. Apply the velocity
+            this.mob.setDeltaMovement(
+                    awayDir.x * horizontalStrength,
+                    verticalStrength,
+                    awayDir.z * horizontalStrength
+            );
+
+            // 4. This is the replacement for hasImpulse
+            // It tells the server to sync this motion to all nearby players
+            this.mob.hurtMarked = true;
         }
     }
 
@@ -268,8 +295,7 @@ public class FleeCampfireGoal extends Goal {
     }
 
     private void showFearParticles() {
-        if (this.startleTicks == 19 && this.mob.level() instanceof ServerLevel serverLevel) {
-            log("Fear Particles");
+        if (this.mob.level() instanceof ServerLevel serverLevel) {
             serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.ANGRY_VILLAGER,
                     this.mob.getX(), this.mob.getEyeY() + 0.5, this.mob.getZ(),
                     3, 0.2, 0.2, 0.2, 0.0);
@@ -330,5 +356,36 @@ public class FleeCampfireGoal extends Goal {
         Vec3 firePos = Vec3.atCenterOf(nearestFire);
         Vec3 away = mob.position().subtract(firePos).normalize();
         mob.push(away.x * 0.3, 0.1, away.z * 0.3); // backstep slightly
+    }
+
+    private Vec3 findValidFleeTarget() {
+        Vec3 firePos = Vec3.atCenterOf(nearestFire);
+        double minDistanceSqr = dangerDistance * dangerDistance;
+
+        // Try up to 10 times to find a "good enough" spot
+        for (int i = 0; i < 10; i++) {
+            // Find a position a max of double dangerDistance away and 7 vertical
+            Vec3 target = LandRandomPos.getPosAway(this.mob, (dangerDistance * 2), 7, firePos);
+
+            if (target != null) {
+                double distToFireSqr = target.distanceToSqr(firePos);
+
+                // Validate: Is this target actually far enough away?
+                if (distToFireSqr >= minDistanceSqr) {
+                    return target; // Success!
+                }
+            }
+        }
+
+        // Fallback: If 10 tries fail, return null (mob is likely cornered)
+        return null;
+    }
+
+    private enum FleeState {
+        IDLE,
+        STARTLED,
+        START_FLEEING,
+        FLEEING,
+        RECOVERING
     }
 }

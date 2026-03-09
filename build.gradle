@@ -3,11 +3,11 @@ plugins {
 	id 'maven-publish'
 }
 
-version = project.mod_version
+version = "${project.minecraft_version}-${project.mod_version}"
 group = project.maven_group
 
 base {
-	archivesName = project.archives_base_name
+	archivesName = project.mod_id
 }
 
 repositories {
@@ -50,12 +50,6 @@ dependencies {
 	modApi("me.shedaniel.cloth:cloth-config-fabric:21.11.153") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
-
-//	compileOnly "org.projectlombok:lombok:${project.lombok_version}"
-//	annotationProcessor "org.projectlombok:lombok:${project.lombok_version}"
-//
-//	testCompileOnly "org.projectlombok:lombok:${project.lombok_version}"
-//	testAnnotationProcessor "org.projectlombok:lombok:${project.lombok_version}"
 }
 
 processResources {
@@ -92,7 +86,7 @@ jar {
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
-			artifactId = project.archives_base_name
+			artifactId = project.mod_id
 			from components.java
 		}
 	}
