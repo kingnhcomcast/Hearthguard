@@ -27,6 +27,7 @@ import java.util.EnumSet;
 
 public class FleeCampfireGoal extends Goal {
     public static final Logger LOGGER = LoggerFactory.getLogger(Hearthguard.MOD_ID);
+    private static final int CAMPFIRE_SCAN_COOLDOWN = 10;
     private static final int STARTLED_TIME = 20;    //how long to stay startled
     private static final int RECOVERY_TIME = 20;    //how long to wait after fleeing before mob can be started
 
@@ -34,9 +35,10 @@ public class FleeCampfireGoal extends Goal {
     private BlockPos nearestFire;
     private FleeState fleeState = FleeState.IDLE;
     private int stateTimer = 0;
+    private int scanCooldown = 0;
 
 
-    public FleeCampfireGoal(PathfinderMob mob, int startleDistance, double fastSpeed, double slowSpeed) {
+    public FleeCampfireGoal(PathfinderMob mob) {
         this.mob = mob;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
@@ -52,8 +54,13 @@ public class FleeCampfireGoal extends Goal {
         }
 
         if (fleeState != FleeState.IDLE) return false;
+        if (this.scanCooldown > 0) {
+            this.scanCooldown--;
+            return false;
+        }
 
         nearestFire = findNearestLitCampfire();
+        this.scanCooldown = CAMPFIRE_SCAN_COOLDOWN;
         if(nearestFire != null) {
             return hasLineOfSight(nearestFire);
         }
@@ -64,6 +71,7 @@ public class FleeCampfireGoal extends Goal {
     @Override
     public void start() {
         this.mob.getNavigation().stop();
+        this.scanCooldown = 0;
 
         fleeState = FleeState.STARTLED;
         log(fleeState.name());
@@ -80,6 +88,7 @@ public class FleeCampfireGoal extends Goal {
         this.mob.getNavigation().stop();
         mob.setSilent(false);
         stateTimer = 0;
+        scanCooldown = 0;
         fleeState = FleeState.IDLE;
         log(fleeState.name());
     }
@@ -332,7 +341,7 @@ public class FleeCampfireGoal extends Goal {
 
     private void log(String msg) {
         String fullMsg = "%s:%s %s".formatted(mob.getDisplayName().getString(), mob.getId(), msg);
-        LOGGER.info(fullMsg);
+        LOGGER.debug(fullMsg);
     }
 
     public static void playMobHurtSound(Mob mob) {

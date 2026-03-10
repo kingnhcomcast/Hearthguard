@@ -1,12 +1,12 @@
 package io.drahlek.hearthguard.config;
 
 import com.google.gson.annotations.SerializedName;
+import io.drahlek.hearthguard.Hearthguard;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Writer;
 import java.nio.file.Files;
@@ -38,12 +38,6 @@ public class HearthguardConfig {
     public static HearthguardConfig getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new HearthguardConfig();
-            // initialize defaults here
-            INSTANCE.modeEnum = Mode.WHITELIST;
-            INSTANCE.mobs = new HashSet<>();
-            INSTANCE.range = 8;
-            INSTANCE.fleeFastSpeed = 1.2;
-            INSTANCE.fleeSlowSpeed = 1.0;
         }
         return INSTANCE;
     }
@@ -59,7 +53,7 @@ public class HearthguardConfig {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Hearthguard.LOGGER.error("Failed to load config from {}", file, e);
         }
 
         // If file didn't exist or loading failed, use defaults
@@ -72,6 +66,7 @@ public class HearthguardConfig {
                 INSTANCE.modeEnum = Mode.valueOf(INSTANCE.mode);
             } catch (IllegalArgumentException e) {
                 INSTANCE.modeEnum = Mode.WHITELIST;
+                Hearthguard.LOGGER.warn("Invalid config mode '{}', defaulting to {}", INSTANCE.mode, INSTANCE.modeEnum);
             }
         }
 
@@ -138,7 +133,7 @@ public class HearthguardConfig {
                 GSON.toJson(this, writer);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Hearthguard.LOGGER.error("Failed to save config", e);
         }
     }
 
