@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //TODO config defaults, add default mobs - only overworld hostiles
-//TODO sound not heard when running in MC launcher
 //TODO test with other mod hostiles
 public class Hearthguard implements ModInitializer {
     public static final String MOD_ID = "hearthguard";

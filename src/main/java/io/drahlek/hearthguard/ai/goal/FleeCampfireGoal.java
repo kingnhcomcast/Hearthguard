@@ -3,6 +3,7 @@ package io.drahlek.hearthguard.ai.goal;
 import io.drahlek.hearthguard.Hearthguard;
 import io.drahlek.hearthguard.config.HearthguardConfig;
 import io.drahlek.hearthguard.entity.FearDropTracker;
+import io.drahlek.hearthguard.entity.SilentStateTracker;
 import io.drahlek.hearthguard.mixin.MobInvokerMixin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -75,6 +76,11 @@ public class FleeCampfireGoal extends Goal {
         this.mob.getNavigation().stop();
         this.scanCooldown = 0;
 
+        if (this.mob instanceof SilentStateTracker silentStateTracker) {
+            silentStateTracker.hearthguard$setOriginalSilent(mob.isSilent());
+            silentStateTracker.hearthguard$setForcedSilent(true);
+        }
+
         fleeState = FleeState.STARTLED;
         log(fleeState.name());
         showFearParticles();
@@ -88,7 +94,10 @@ public class FleeCampfireGoal extends Goal {
     public void stop() {
         this.nearestFire = null;
         this.mob.getNavigation().stop();
-        mob.setSilent(false);
+        if (this.mob instanceof SilentStateTracker silentStateTracker) {
+            mob.setSilent(silentStateTracker.hearthguard$getOriginalSilent());
+            silentStateTracker.hearthguard$setForcedSilent(false);
+        }
         stateTimer = 0;
         scanCooldown = 0;
         fleeState = FleeState.IDLE;
