@@ -2,6 +2,7 @@ package io.drahlek.hearthguard.ai.goal;
 
 import io.drahlek.hearthguard.Hearthguard;
 import io.drahlek.hearthguard.config.HearthguardConfig;
+import io.drahlek.hearthguard.entity.FearDropTracker;
 import io.drahlek.hearthguard.mixin.MobInvokerMixin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -256,6 +257,11 @@ public class FleeCampfireGoal extends Goal {
 
     private void dropItem() {
         if (this.mob.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            FearDropTracker fearDropTracker = (FearDropTracker) this.mob;
+            if (fearDropTracker.hearthguard$hasDroppedFearItem()) {
+                return;
+            }
+
             float dropChance = HearthguardConfig.getInstance().getDropItemChance() / 100.0F;
             if (dropChance <= 0.0F) {
                 return;
@@ -279,8 +285,7 @@ public class FleeCampfireGoal extends Goal {
                         return;
                     }
 
-                    ItemStack stack = drops.getFirst();
-                    stack.setCount(1);
+                    ItemStack stack = drops.getFirst().copyWithCount(1);
 
                     // Create the ItemEntity manually
                     net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(
@@ -298,6 +303,7 @@ public class FleeCampfireGoal extends Goal {
                     itemEntity.setDeltaMovement(xVel, 0.4, zVel);
 
                     serverLevel.addFreshEntity(itemEntity);
+                    fearDropTracker.hearthguard$setDroppedFearItem(true);
                 });
             }
         }

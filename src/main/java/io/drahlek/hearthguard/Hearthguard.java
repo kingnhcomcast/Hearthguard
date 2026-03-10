@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //TODO config defaults, add default mobs - only overworld hostiles
-//TODO make sure they only ever drop 1 item
 //TODO sound not heard when running in MC launcher
 //TODO test with other mod hostiles
 //TODO dont work in nether
