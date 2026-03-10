@@ -1,0 +1,5 @@
+HearthGuard turns a simple campfire into a pocket of safety. In the Overworld, hostile mobs feel the heat and hesitate, keeping their distance instead of rushing you. Drop a campfire at a new base, during a mining stop, or while you are caught out at night, and the space around the flames becomes a calm buffer that gives you room to build, sort, and breathe.
+
+You still have to be smart about placement and line of sight, but the mod shifts the rhythm of survival: lighting a campfire is no longer just for ambiance, it is a tactical choice. The result is a world that feels a little more grounded and a lot more manageable without removing the tension of danger.
+
+HearthGuard supports adjustable ranges and speeds, per-mob allowlists or blocklists, and optional one-time fear drops for a small reward the first time a mob is driven off.
