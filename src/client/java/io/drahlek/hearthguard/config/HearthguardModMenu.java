@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import io.drahlek.hearthguard.util.MobRules;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
@@ -124,6 +125,10 @@ public class HearthguardModMenu implements ModMenuApi {
             for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
                 if (type.getCategory() != MobCategory.MONSTER)
                     continue;
+
+                if (MobRules.isBossMob(type)) {
+                    continue;
+                }
 
                 Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
 

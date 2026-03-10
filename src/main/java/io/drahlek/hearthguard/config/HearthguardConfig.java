@@ -23,9 +23,21 @@ public class HearthguardConfig {
     private static HearthguardConfig INSTANCE;
 
 
-    private String mode;
-    private Set<String> mobs = new HashSet<>();
-    private transient Mode modeEnum;
+    private String mode = Mode.WHITELIST.name();
+    private Set<String> mobs = new HashSet<>(Set.of(
+            "minecraft:zombie",
+            "minecraft:zombie_villager",
+            "minecraft:husk",
+            "minecraft:drowned",
+            "minecraft:skeleton",
+            "minecraft:stray",
+            "minecraft:bogged",
+            "minecraft:creeper",
+            "minecraft:spider",
+            "minecraft:cave_spider",
+            "minecraft:slime"
+    ));
+    private transient Mode modeEnum = Mode.WHITELIST;
     private int range = 8;
     @SerializedName("flee_fast_speed")
     private double fleeFastSpeed = 1.2;

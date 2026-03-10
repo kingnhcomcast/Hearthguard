@@ -5,6 +5,7 @@ import io.drahlek.hearthguard.config.HearthguardConfig;
 import io.drahlek.hearthguard.entity.FearDropTracker;
 import io.drahlek.hearthguard.entity.SilentStateTracker;
 import io.drahlek.hearthguard.mixin.MobInvokerMixin;
+import io.drahlek.hearthguard.util.MobRules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -45,6 +46,10 @@ public class FleeCampfireGoal extends Goal {
 
     @Override
     public boolean canUse() {
+        if (MobRules.isBossMob(this.mob.getType())) {
+            return false;
+        }
+
         if (!HearthguardConfig.getInstance().shouldApply(this.mob.getType())) {
             return false;
         }
@@ -431,6 +436,7 @@ public class FleeCampfireGoal extends Goal {
     private int getDangerDistance() {
         return getStartleDistance() * 2;
     }
+
 
     private double getFastSpeed() {
         return HearthguardConfig.getInstance().getFleeFastSpeed();
