@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 //TODO make sure they only ever drop 1 item
 //TODO sound not heard when running in MC launcher
 //TODO test with other mod hostiles
+//TODO dont work in nether
 public class Hearthguard implements ModInitializer {
     public static final String MOD_ID = "hearthguard";
 

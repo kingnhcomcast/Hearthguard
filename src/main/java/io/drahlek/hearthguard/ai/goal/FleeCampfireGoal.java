@@ -1,6 +1,7 @@
 package io.drahlek.hearthguard.ai.goal;
 
 import io.drahlek.hearthguard.Hearthguard;
+import io.drahlek.hearthguard.config.HearthguardConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -30,10 +31,6 @@ public class FleeCampfireGoal extends Goal {
     private static final int RECOVERY_TIME = 20;    //how long to wait after fleeing before mob can be started
 
     private final PathfinderMob mob;
-    private final double fastSpeed;
-    private final double slowSpeed;
-    private final int startleDistance;
-    private final int dangerDistance;
     private BlockPos nearestFire;
     private FleeState fleeState = FleeState.IDLE;
     private int stateTimer = 0;
@@ -41,15 +38,19 @@ public class FleeCampfireGoal extends Goal {
 
     public FleeCampfireGoal(PathfinderMob mob, int startleDistance, double fastSpeed, double slowSpeed) {
         this.mob = mob;
-        this.startleDistance = startleDistance;
-        this.dangerDistance = startleDistance * 2;
-        this.fastSpeed = fastSpeed;
-        this.slowSpeed = slowSpeed;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
     }
 
     @Override
     public boolean canUse() {
+        if (!HearthguardConfig.getInstance().shouldApply(this.mob.getType())) {
+            return false;
+        }
+
+        if (this.mob.level().dimension() != Level.OVERWORLD) {
+            return false;
+        }
+
         if (fleeState != FleeState.IDLE) return false;
 
         nearestFire = findNearestLitCampfire();
@@ -85,6 +86,18 @@ public class FleeCampfireGoal extends Goal {
 
     @Override
     public boolean canContinueToUse() {
+        if (this.nearestFire == null) {
+            return false;
+        }
+
+        if (!HearthguardConfig.getInstance().shouldApply(this.mob.getType())) {
+            return false;
+        }
+
+        if (this.mob.level().dimension() != Level.OVERWORLD) {
+            return false;
+        }
+
         // 1. If the fire is gone or unlit, we stop fleeing.
         BlockState state = this.mob.level().getBlockState(nearestFire);
         if (state.isAir() || !state.hasProperty(CampfireBlock.LIT) || !state.getValue(CampfireBlock.LIT)) {
@@ -97,8 +110,9 @@ public class FleeCampfireGoal extends Goal {
     private BlockPos findNearestLitCampfire() {
         BlockPos mobPos = mob.blockPosition();
         Level level = mob.level();
-
-        int r = (int) startleDistance;
+        int r = getStartleDistance();
+        BlockPos nearestPos = null;
+        double nearestDistanceSqr = Double.MAX_VALUE;
 
         for (BlockPos pos : BlockPos.betweenClosed(
                 mobPos.offset(-r, -2, -r),
@@ -108,11 +122,15 @@ public class FleeCampfireGoal extends Goal {
 
             if (state.getBlock() instanceof CampfireBlock
                     && state.getValue(CampfireBlock.LIT)) {
-                return pos.immutable();
+                double distanceSqr = pos.distSqr(mobPos);
+                if (distanceSqr < nearestDistanceSqr) {
+                    nearestDistanceSqr = distanceSqr;
+                    nearestPos = pos.immutable();
+                }
             }
         }
 
-        return null;
+        return nearestPos;
     }
 
     private boolean hasLineOfSight(BlockPos pos) {
@@ -160,6 +178,7 @@ public class FleeCampfireGoal extends Goal {
             case FLEEING -> {
                 // Check if we are far enough away from the fire to stop fleeing
                 double distSqr = this.mob.distanceToSqr(Vec3.atCenterOf(nearestFire));
+                int dangerDistance = getDangerDistance();
                 boolean stillInDanger = distSqr < (dangerDistance * dangerDistance);
 
                 // transition to recovering once out of danger
@@ -187,6 +206,7 @@ public class FleeCampfireGoal extends Goal {
     private void flee() {
         // Handle Dynamic Speed
         double distSqr = this.mob.distanceToSqr(nearestFire.getCenter());
+        int dangerDistance = getDangerDistance();
 
         if(distSqr >= dangerDistance * dangerDistance) {
             this.mob.getNavigation().stop();
@@ -196,7 +216,10 @@ public class FleeCampfireGoal extends Goal {
             return;
         }
 
-        this.mob.getNavigation().setSpeedModifier(distSqr < (startleDistance * 1.5 * startleDistance * 1.5) ? this.fastSpeed : this.slowSpeed);
+        int startleDistance = getStartleDistance();
+        this.mob.getNavigation().setSpeedModifier(
+                distSqr < (startleDistance * 1.5 * startleDistance * 1.5) ? getFastSpeed() : getSlowSpeed()
+        );
     }
 
     private void setFleeDestinationAndFlee() {
@@ -205,7 +228,7 @@ public class FleeCampfireGoal extends Goal {
             Vec3 target = findValidFleeTarget();
 
             if (target != null) {
-                Boolean result = this.mob.getNavigation().moveTo(target.x, target.y, target.z, this.fastSpeed);
+                this.mob.getNavigation().moveTo(target.x, target.y, target.z, getFastSpeed());
             } else {
                 log("No target found");
                 fleeState = FleeState.RECOVERING;
@@ -240,7 +263,12 @@ public class FleeCampfireGoal extends Goal {
                     LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(lootTableKey);
 
                     // 3. Generate and spawn the items
-                    ItemStack stack = lootTable.getRandomItems(lootParams).getFirst();
+                    java.util.List<ItemStack> drops = lootTable.getRandomItems(lootParams);
+                    if (drops.isEmpty()) {
+                        return;
+                    }
+
+                    ItemStack stack = drops.getFirst();
                     stack.setCount(1);
 
                     // Create the ItemEntity manually
@@ -360,6 +388,7 @@ public class FleeCampfireGoal extends Goal {
 
     private Vec3 findValidFleeTarget() {
         Vec3 firePos = Vec3.atCenterOf(nearestFire);
+        int dangerDistance = getDangerDistance();
         double minDistanceSqr = dangerDistance * dangerDistance;
 
         // Try up to 10 times to find a "good enough" spot
@@ -379,6 +408,22 @@ public class FleeCampfireGoal extends Goal {
 
         // Fallback: If 10 tries fail, return null (mob is likely cornered)
         return null;
+    }
+
+    private int getStartleDistance() {
+        return HearthguardConfig.getInstance().getRange();
+    }
+
+    private int getDangerDistance() {
+        return getStartleDistance() * 2;
+    }
+
+    private double getFastSpeed() {
+        return HearthguardConfig.getInstance().getFleeFastSpeed();
+    }
+
+    private double getSlowSpeed() {
+        return HearthguardConfig.getInstance().getFleeSlowSpeed();
     }
 
     private enum FleeState {

@@ -18,9 +18,11 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class HearthguardModMenu implements ModMenuApi {
     private static Map<String, List<EntityType<?>>> mobsByMod = null;
@@ -32,6 +34,7 @@ public class HearthguardModMenu implements ModMenuApi {
 
     private Screen createConfigScreen(Screen parent) {
         HearthguardConfig config = HearthguardConfig.getInstance();
+        Set<String> selectedMobs = new HashSet<>(config.getMobs());
         HearthguardConfig.Mode currentMode = config.getModeEnum() != null
                 ? config.getModeEnum() : HearthguardConfig.Mode.WHITELIST;
         ConfigBuilder builder = ConfigBuilder.create()
@@ -47,16 +50,20 @@ public class HearthguardModMenu implements ModMenuApi {
 
         //for each mod, build a tab of mobs
         for (String modid : mobsByMod.keySet()) {
-            buildMobSelectionTab(modid, builder, mobsByMod, config, entryBuilder);
+            buildMobSelectionTab(modid, builder, mobsByMod, selectedMobs, entryBuilder);
         }
 
         // Save config when pressing Done
-        builder.setSavingRunnable(config::save);
+        builder.setSavingRunnable(() -> {
+            config.getMobs().clear();
+            config.getMobs().addAll(selectedMobs);
+            config.save();
+        });
 
         return builder.build();
     }
 
-    private void buildMobSelectionTab(String modid, ConfigBuilder builder, Map<String, List<EntityType<?>>> mobsByMod, HearthguardConfig config, ConfigEntryBuilder entryBuilder) {
+    private void buildMobSelectionTab(String modid, ConfigBuilder builder, Map<String, List<EntityType<?>>> mobsByMod, Set<String> selectedMobs, ConfigEntryBuilder entryBuilder) {
         // ===== Mob List =====
        List<BooleanListEntry> mobEntries = new ArrayList<>();
 
@@ -66,17 +73,17 @@ public class HearthguardModMenu implements ModMenuApi {
             String displayName = type.getDescription().getString();
             String longName = BuiltInRegistries.ENTITY_TYPE.getKey(type).toString();
 
-            boolean selected = config.getMobs().contains(longName);
+            boolean selected = selectedMobs.contains(longName);
 
             BooleanListEntry entry =
                     entryBuilder.startBooleanToggle(Component.literal(displayName), selected)
                             .setDefaultValue(false)
                             .setSaveConsumer(sel -> {
                                 if (sel) {
-                                    config.getMobs().add(longName);
+                                    selectedMobs.add(longName);
                                 }
                                 else {
-                                    config.getMobs().remove(longName);
+                                    selectedMobs.remove(longName);
                                 }
                             })
                             .build();
@@ -92,11 +99,11 @@ public class HearthguardModMenu implements ModMenuApi {
             List<EntityType<?>> mobs = mobsByMod.get(modid);
             if (shouldSelect) {
                 mobs.forEach(mobType -> {
-                    config.getMobs().add(BuiltInRegistries.ENTITY_TYPE.getKey(mobType).toString());
+                    selectedMobs.add(BuiltInRegistries.ENTITY_TYPE.getKey(mobType).toString());
                 });
             } else {
                 mobs.forEach(mobType -> {
-                    config.getMobs().remove(BuiltInRegistries.ENTITY_TYPE.getKey(mobType).toString());
+                    selectedMobs.remove(BuiltInRegistries.ENTITY_TYPE.getKey(mobType).toString());
                 });
             }
 
