@@ -2,16 +2,17 @@
   "schemaVersion": 1,
   "id": "hearthguard",
   "version": "${version}",
-  "name": "Hearthguard",
-  "description": "Causes some hostile mobs to flee a lit campfire.",
+  "name": "HearthGuard",
+  "description": "Campfires repel hostile mobs, creating a safe perimeter.",
   "authors": [
-    "Me!"
+    "Kevin King"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/kingnhcomcast/Hearthguard",
+    "sources": "https://github.com/kingnhcomcast/Hearthguard",
+    "issues": "https://github.com/kingnhcomcast/Hearthguard/issues"
   },
-  "license": "CC0-1.0",
+  "license": "MIT",
   "icon": "assets/hearthguard/icon.png",
   "environment": "*",
   "entrypoints": {

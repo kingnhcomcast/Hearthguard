@@ -13,7 +13,7 @@ HearthGuard is a Fabric mod for Minecraft that makes hostile mobs fear and flee 
 
 ## Configuration
 
-HearthGuard loads its config from `config/hearthguard.json` and also exposes a client UI.
+HearthGuard loads its config from `config/hearthguard/config.json` and also exposes a client UI.
 
 Settings:
 - `Range`: Campfire detection distance (blocks)
@@ -53,6 +53,10 @@ Run client:
 - Fabric API `0.141.3+1.21.11`
 - Mod Menu `17.0.0-beta.2` (optional, for config UI)
 - Cloth Config `21.11.153` (optional, for config UI)
+
+## Known Issues
+
+- Datapack-defined mobs that reuse vanilla entity IDs cannot be selected independently in the mob list.
 
 ## License
 
