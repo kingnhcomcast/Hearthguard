@@ -36,7 +36,6 @@ public class FleeCampfireGoal extends Goal {
     private int stateTimer = 0;
     private int scanCooldown = 0;
 
-
     public FleeCampfireGoal(PathfinderMob mob) {
         this.mob = mob;
         this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
@@ -52,7 +51,10 @@ public class FleeCampfireGoal extends Goal {
             return false;
         }
 
-        if (fleeState != FleeState.IDLE) return false;
+        if (fleeState != FleeState.IDLE) {
+            return false;
+        }
+
         if (this.scanCooldown > 0) {
             this.scanCooldown--;
             return false;
@@ -60,7 +62,7 @@ public class FleeCampfireGoal extends Goal {
 
         nearestFire = findNearestLitCampfire();
         this.scanCooldown = CAMPFIRE_SCAN_COOLDOWN;
-        if(nearestFire != null) {
+        if (nearestFire != null) {
             return hasLineOfSight(nearestFire);
         }
 
@@ -109,7 +111,7 @@ public class FleeCampfireGoal extends Goal {
         // 1. If the fire is gone or unlit, we stop fleeing.
         BlockState state = this.mob.level().getBlockState(nearestFire);
         if (state.isAir() || !state.hasProperty(CampfireBlock.LIT) || !state.getValue(CampfireBlock.LIT)) {
-            return false; // Exit goal safely
+            return false;
         }
 
         return fleeState != FleeState.IDLE;
@@ -160,16 +162,17 @@ public class FleeCampfireGoal extends Goal {
 
     @Override
     public void tick() {
-        // 1. Safety check - if the fire was broken while fleeing
-        if (this.nearestFire == null) return;
+        if (this.nearestFire == null) {
+            return;
+        }
 
-        switch(fleeState) {
+        switch (fleeState) {
             case IDLE -> {
             }
             case STARTLED -> {
                 shiver();
                 faceFire(mob);
-                if(++stateTimer >= STARTLED_TIME) {
+                if (++stateTimer >= STARTLED_TIME) {
                     fleeState = FleeState.START_FLEEING;
                     log(fleeState.name());
                 }
@@ -203,7 +206,7 @@ public class FleeCampfireGoal extends Goal {
                 }
             }
             case RECOVERING -> {
-                if(++stateTimer >= RECOVERY_TIME) {
+                if (++stateTimer >= RECOVERY_TIME) {
                     fleeState = FleeState.IDLE;
                     log(fleeState.name());
                 }
@@ -212,11 +215,10 @@ public class FleeCampfireGoal extends Goal {
     }
 
     private void flee() {
-        // Handle Dynamic Speed
         double distSqr = this.mob.distanceToSqr(nearestFire.getCenter());
         int dangerDistance = getDangerDistance();
 
-        if(distSqr >= dangerDistance * dangerDistance) {
+        if (distSqr >= dangerDistance * dangerDistance) {
             this.mob.getNavigation().stop();
             fleeState = FleeState.RECOVERING;
             log(fleeState.name());
@@ -232,7 +234,6 @@ public class FleeCampfireGoal extends Goal {
 
     private void setFleeDestinationAndFlee() {
         if (this.mob.getNavigation().isDone()) {
-            //Vec3 target = LandRandomPos.getPosAway(mob, 16, 7, Vec3.atCenterOf(nearestFire));
             Vec3 target = findValidFleeTarget();
 
             if (target != null) {
@@ -247,7 +248,6 @@ public class FleeCampfireGoal extends Goal {
 
     private void showPoofParticles() {
         if (this.mob.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-            // VISUAL: "Shock" Poof
             serverLevel.sendParticles(net.minecraft.core.particles.ParticleTypes.POOF,
                     this.mob.getX(), this.mob.getY() + 0.5, this.mob.getZ(),
                     5, 0.1, 0.1, 0.1, 0.05);
@@ -257,8 +257,7 @@ public class FleeCampfireGoal extends Goal {
     private void dropItem() {
         if (this.mob.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
             if (this.mob.getRandom().nextFloat() < 0.25F) {
-                // 1. Create the LootParams (Context for the drop)
-                // In 1.21.1, we use LootParams.Builder
+                // Create the LootParams (Context for the drop)
                 net.minecraft.world.level.storage.loot.LootParams lootParams = new net.minecraft.world.level.storage.loot.LootParams.Builder(serverLevel)
                         .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN, this.mob.position())
                         .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.THIS_ENTITY, this.mob)
@@ -266,7 +265,6 @@ public class FleeCampfireGoal extends Goal {
                         .create(net.minecraft.world.level.storage.loot.parameters.LootContextParamSets.ENTITY);
 
                 // 2. Retrieve the Loot Table using Reloadable Registries
-                // Note: .getLootTables() is deprecated in 1.21; use reloadableRegistries()
                 this.mob.getLootTable().ifPresent(lootTableKey -> {
                     LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(lootTableKey);
 
@@ -303,22 +301,14 @@ public class FleeCampfireGoal extends Goal {
     private void jump() {
         if (this.mob.onGround()) {
             Vec3 firePos = Vec3.atCenterOf(nearestFire);
-            // 1. Direction: From the fire TO the mob
             Vec3 awayDir = this.mob.position().subtract(firePos).normalize();
-
-            // 2. Strength: Horizontal leap + Vertical lift
             double horizontalStrength = 0.5;
             double verticalStrength = 0.42;
-
-            // 3. Apply the velocity
             this.mob.setDeltaMovement(
                     awayDir.x * horizontalStrength,
                     verticalStrength,
                     awayDir.z * horizontalStrength
             );
-
-            // 4. This is the replacement for hasImpulse
-            // It tells the server to sync this motion to all nearby players
             this.mob.hurtMarked = true;
         }
     }
@@ -359,7 +349,9 @@ public class FleeCampfireGoal extends Goal {
     }
 
     private void faceFire(Mob mob) {
-        if (this.nearestFire == null) return;
+        if (this.nearestFire == null) {
+            return;
+        }
 
         // 1. Calculate the angle (Yaw) to the fire
         double dX = nearestFire.getX() + 0.5 - mob.getX();
@@ -378,7 +370,7 @@ public class FleeCampfireGoal extends Goal {
         mob.yHeadRotO = targetYaw;
         mob.yBodyRotO = targetYaw;
 
-        // Optional: Still call this so the AI "internalizes" where it's looking
+        // Still call this so the AI "internalizes" where it's looking
         mob.getLookControl().setLookAt(Vec3.atCenterOf(nearestFire));
     }
 
@@ -403,7 +395,7 @@ public class FleeCampfireGoal extends Goal {
 
                 // Validate: Is this target actually far enough away?
                 if (distToFireSqr >= minDistanceSqr) {
-                    return target; // Success!
+                    return target;
                 }
             }
         }
