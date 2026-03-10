@@ -2,6 +2,7 @@ package io.drahlek.hearthguard.ai.goal;
 
 import io.drahlek.hearthguard.Hearthguard;
 import io.drahlek.hearthguard.config.HearthguardConfig;
+import io.drahlek.hearthguard.mixin.MobInvokerMixin;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
@@ -22,7 +23,6 @@ import net.minecraft.world.phys.Vec3;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Method;
 import java.util.EnumSet;
 
 public class FleeCampfireGoal extends Goal {
@@ -347,13 +347,7 @@ public class FleeCampfireGoal extends Goal {
     public static void playMobHurtSound(Mob mob) {
         mob.setSilent(false);
         try {
-            Method method = mob.getClass().getDeclaredMethod("getHurtSound", DamageSource.class);
-            method.setAccessible(true);
-
-            SoundEvent sound = (SoundEvent) method.invoke(
-                    mob,
-                    mob.damageSources().generic()
-            );
+            SoundEvent sound = ((MobInvokerMixin) mob).hearthguard$invokeGetHurtSound(mob.damageSources().generic());
 
             if (sound != null) {
                 mob.playSound(sound, 1.0F, 1.0F);
