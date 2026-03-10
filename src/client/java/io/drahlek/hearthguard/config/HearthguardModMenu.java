@@ -171,6 +171,14 @@ public class HearthguardModMenu implements ModMenuApi {
                         .build()
         );
 
+        general.addEntry(
+                entryBuilder.startIntSlider(Component.literal("Drop Item Chance"), config.getDropItemChance(), 0, 100)
+                        .setDefaultValue(25)
+                        .setTextGetter(value -> Component.literal(value + "%"))
+                        .setSaveConsumer(config::setDropItemChance)
+                        .build()
+        );
+
         // Mode selector
         general.addEntry(
                 entryBuilder.startEnumSelector(Component.literal("Mode"), HearthguardConfig.Mode.class, currentMode)

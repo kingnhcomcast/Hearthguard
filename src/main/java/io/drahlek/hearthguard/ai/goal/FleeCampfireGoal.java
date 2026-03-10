@@ -256,7 +256,12 @@ public class FleeCampfireGoal extends Goal {
 
     private void dropItem() {
         if (this.mob.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-            if (this.mob.getRandom().nextFloat() < 0.25F) {
+            float dropChance = HearthguardConfig.getInstance().getDropItemChance() / 100.0F;
+            if (dropChance <= 0.0F) {
+                return;
+            }
+
+            if (this.mob.getRandom().nextFloat() < dropChance) {
                 // Create the LootParams (Context for the drop)
                 net.minecraft.world.level.storage.loot.LootParams lootParams = new net.minecraft.world.level.storage.loot.LootParams.Builder(serverLevel)
                         .withParameter(net.minecraft.world.level.storage.loot.parameters.LootContextParams.ORIGIN, this.mob.position())

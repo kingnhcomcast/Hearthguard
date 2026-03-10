@@ -2,6 +2,7 @@
   "range": 8,
   "flee_fast_speed": 1.2,
   "flee_slow_speed": 1.0,
+  "drop_item_chance": 25,
   "mode": "WHITELIST",
   "mobs": [
     "minecraft:zombie",

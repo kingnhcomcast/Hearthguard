@@ -31,6 +31,8 @@ public class HearthguardConfig {
     private double fleeFastSpeed = 1.2;
     @SerializedName("flee_slow_speed")
     private double fleeSlowSpeed = 1.0;
+    @SerializedName("drop_item_chance")
+    private int dropItemChance = 25;
 
     // =====================
     // Singleton access
@@ -116,6 +118,14 @@ public class HearthguardConfig {
             mobs = new HashSet<>();
         }
         return mobs;
+    }
+
+    public int getDropItemChance() {
+        return dropItemChance;
+    }
+
+    public void setDropItemChance(int dropItemChance) {
+        this.dropItemChance = Math.max(0, Math.min(dropItemChance, 100));
     }
 
     // =====================
