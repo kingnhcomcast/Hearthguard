@@ -7,6 +7,8 @@ import io.drahlek.hearthguard.entity.SilentStateTracker;
 import io.drahlek.hearthguard.mixin.MobInvokerMixin;
 import io.drahlek.hearthguard.util.MobRules;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Mob;
@@ -354,7 +356,8 @@ public class FleeCampfireGoal extends Goal {
     }
 
     private void log(String msg) {
-        String fullMsg = "%s:%s %s".formatted(mob.getDisplayName().getString(), mob.getId(), msg);
+        Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
+        String fullMsg = "%s:%s [%s] %s".formatted(mob.getDisplayName().getString(), mob.getId(), typeId.toString(), msg);
         LOGGER.debug(fullMsg);
     }
 

@@ -5,7 +5,7 @@ import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//TODO test with other mod hostiles
+//TODO add support for mobs created via datapacks that use vanilla mobids
 public class Hearthguard implements ModInitializer {
     public static final String MOD_ID = "hearthguard";
 

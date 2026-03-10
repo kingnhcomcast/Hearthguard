@@ -33,6 +33,14 @@ loom {
 		}
 	}
 
+	runs {
+		client {
+			property "log4j.configurationFile", "classpath:log4j2.xml"
+		}
+		server {
+			property "log4j.configurationFile", "classpath:log4j2.xml"
+		}
+	}
 }
 
 dependencies {
@@ -72,6 +80,22 @@ java {
 
 	sourceCompatibility = JavaVersion.VERSION_21
 	targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.register("syncLog4jConfig") {
+	inputs.file("src/main/resources/log4j2.xml")
+	outputs.file(".gradle/loom-cache/log4j.xml")
+	doLast {
+		copy {
+			from("src/main/resources/log4j2.xml")
+			into(".gradle/loom-cache")
+			rename { "log4j.xml" }
+		}
+	}
+}
+
+tasks.named("configureLaunch") {
+	dependsOn("syncLog4jConfig")
 }
 
 jar {
