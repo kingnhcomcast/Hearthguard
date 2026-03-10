@@ -144,10 +144,11 @@ public class HearthguardConfig {
     // JSON Save
     // =====================
     public void save() {
+        Path file = null;
         try {
             Path configDir = FabricLoader.getInstance().getConfigDir().resolve("hearthguard");
             Files.createDirectories(configDir);
-            Path file = configDir.resolve("config.json");
+            file = configDir.resolve("config.json");
 
             if (modeEnum != null) mode = modeEnum.name();
 
@@ -155,7 +156,7 @@ public class HearthguardConfig {
                 GSON.toJson(this, writer);
             }
         } catch (Exception e) {
-            Hearthguard.LOGGER.error("Failed to save config", e);
+            Hearthguard.LOGGER.error("Failed to save config to {}", file, e);
         }
     }
 

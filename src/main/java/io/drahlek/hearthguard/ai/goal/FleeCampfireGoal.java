@@ -357,7 +357,8 @@ public class FleeCampfireGoal extends Goal {
 
     private void log(String msg) {
         Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
-        String fullMsg = "%s:%s [%s] %s".formatted(mob.getDisplayName().getString(), mob.getId(), typeId.toString(), msg);
+        String typeStr = typeId != null ? typeId.toString() : "<unknown>";
+        String fullMsg = "%s:%s [%s] %s".formatted(mob.getDisplayName().getString(), mob.getId(), typeStr, msg);
         LOGGER.debug(fullMsg);
     }
 
