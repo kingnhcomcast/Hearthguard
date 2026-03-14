@@ -8,8 +8,8 @@
         "${mod_author}"
     ],
     "contact": {
-        "homepage": "https://fabricmc.net/",
-        "sources": "https://github.com/FabricMC/fabric-example-mod"
+        "homepage": "https://github.com/kingnhcomcast/Hearthguard",
+        "sources": "https://github.com/kingnhcomcast/Hearthguard"
     },
     "license": "${license}",
     "icon": "assets/hearthguard/icon.png",
