@@ -12,11 +12,17 @@
         "sources": "https://github.com/FabricMC/fabric-example-mod"
     },
     "license": "${license}",
-    "icon": "${mod_id}.png",
+    "icon": "assets/hearthguard/icon.png",
     "environment": "*",
     "entrypoints": {
         "main": [
-            "io.drahlek.hearthguard.HearthGuard"
+            "io.drahlek.hearthguard.Hearthguard"
+        ],
+        "client": [
+            "io.drahlek.hearthguard.HearthguardClient"
+        ],
+        "modmenu": [
+            "io.drahlek.hearthguard.config.HearthguardModMenu"
         ]
     },
     "mixins": [

@@ -1,18 +1,18 @@
 package io.drahlek.hearthguard;
 
+import io.drahlek.hearthguard.config.HearthguardConfig;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class HearthGuard implements ModInitializer {
-    
+import static io.drahlek.hearthguard.Constants.MOD_ID;
+
+public class Hearthguard implements ModInitializer {
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
     @Override
     public void onInitialize() {
-        
-        // This method is invoked by the Fabric mod loader when it is ready
-        // to load your mod. You can access Fabric and Common code in this
-        // project.
-
-        // Use Fabric to bootstrap the Common mod.
-        Constants.LOG.info("Hello Fabric world!");
-        CommonClass.init();
+        HearthguardConfig.init(FabricLoader.getInstance().getConfigDir().resolve(MOD_ID));
     }
 }

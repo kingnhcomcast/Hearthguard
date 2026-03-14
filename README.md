@@ -57,6 +57,9 @@ Run client:
 ## Known Issues
 
 - Datapack-defined mobs that reuse vanilla entity IDs cannot be selected independently in the mob list.
+- Slimes (and magma cubes) are not affected
+- Changing config in game to select mobs, does not apply to already existing mobs. reloading game does
+- Loot chance 100%, blazes dont seem to drop anything?
 
 ## License
 
