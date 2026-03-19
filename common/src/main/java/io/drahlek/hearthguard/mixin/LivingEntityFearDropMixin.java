@@ -2,10 +2,9 @@ package io.drahlek.hearthguard.mixin;
 
 import io.drahlek.hearthguard.entity.FearDropTracker;
 import io.drahlek.hearthguard.entity.SilentStateTracker;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -59,7 +58,7 @@ public abstract class LivingEntityFearDropMixin implements FearDropTracker, Sile
     }
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
-    private void hearthguard$saveFearDropFlag(ValueOutput output, CallbackInfo ci) {
+    private void hearthguard$saveFearDropFlag(CompoundTag output, CallbackInfo ci) {
         if (((Object) this) instanceof net.minecraft.world.entity.monster.Monster) {
             output.putBoolean(HEARTHGUARD_DROPPED_FEAR_ITEM_TAG, this.hearthguard$droppedFearItem);
             output.putBoolean(HEARTHGUARD_ORIGINAL_SILENT_TAG, this.hearthguard$originalSilent);
@@ -68,11 +67,11 @@ public abstract class LivingEntityFearDropMixin implements FearDropTracker, Sile
     }
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
-    private void hearthguard$readFearDropFlag(ValueInput input, CallbackInfo ci) {
+    private void hearthguard$readFearDropFlag(CompoundTag input, CallbackInfo ci) {
         if (((Object) this) instanceof net.minecraft.world.entity.monster.Monster) {
-            this.hearthguard$droppedFearItem = input.getBooleanOr(HEARTHGUARD_DROPPED_FEAR_ITEM_TAG, false);
-            this.hearthguard$originalSilent = input.getBooleanOr(HEARTHGUARD_ORIGINAL_SILENT_TAG, false);
-            this.hearthguard$forcedSilent = input.getBooleanOr(HEARTHGUARD_FORCED_SILENT_TAG, false);
+            this.hearthguard$droppedFearItem = input.getBoolean(HEARTHGUARD_DROPPED_FEAR_ITEM_TAG);
+            this.hearthguard$originalSilent = input.getBoolean(HEARTHGUARD_ORIGINAL_SILENT_TAG);
+            this.hearthguard$forcedSilent = input.getBoolean(HEARTHGUARD_FORCED_SILENT_TAG);
 
             if (this.hearthguard$forcedSilent) {
                 ((Entity) (Object) this).setSilent(this.hearthguard$originalSilent);

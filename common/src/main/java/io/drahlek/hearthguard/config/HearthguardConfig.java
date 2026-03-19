@@ -3,7 +3,7 @@ package io.drahlek.hearthguard.config;
 import com.google.gson.annotations.SerializedName;
 import io.drahlek.hearthguard.Constants;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 
 import java.io.InputStreamReader;
@@ -165,7 +165,7 @@ public class HearthguardConfig {
     // Utility
     // =====================
     public boolean shouldApply(EntityType<?> type) {
-        Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+        ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
         if (id == null) return false;
 
         String idStr = id.toString();

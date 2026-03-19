@@ -11,11 +11,10 @@ import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import io.drahlek.hearthguard.util.MobRules;
-import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -118,7 +117,7 @@ public class HearthguardModMenu implements ModMenuApi {
         modCategory.getEntries().addFirst(toggleBtn);
     }
 
-    private static @NonNull Map<String, List<EntityType<?>>> getMobsByMod() {
+    private static Map<String, List<EntityType<?>>> getMobsByMod() {
         if(mobsByMod == null) {
             mobsByMod = new HashMap<>();
 
@@ -130,7 +129,7 @@ public class HearthguardModMenu implements ModMenuApi {
                     continue;
                 }
 
-                Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+                ResourceLocation key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
 
                 String modid = key.getNamespace();
                 ModContainer mod = FabricLoader.getInstance().getModContainer(modid).orElse(null);

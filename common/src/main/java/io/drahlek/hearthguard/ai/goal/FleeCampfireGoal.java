@@ -8,7 +8,7 @@ import io.drahlek.hearthguard.mixin.MobInvokerMixin;
 import io.drahlek.hearthguard.util.MobRules;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Mob;
@@ -294,35 +294,34 @@ public class FleeCampfireGoal extends Goal {
                         .create(net.minecraft.world.level.storage.loot.parameters.LootContextParamSets.ENTITY);
 
                 // 2. Retrieve the Loot Table using Reloadable Registries
-                this.mob.getLootTable().ifPresent(lootTableKey -> {
-                    LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(lootTableKey);
+                net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> lootTableKey = this.mob.getLootTable();
+                LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(lootTableKey);
 
-                    // 3. Generate and spawn the items
-                    java.util.List<ItemStack> drops = lootTable.getRandomItems(lootParams);
-                    if (drops.isEmpty()) {
-                        return;
-                    }
+                // 3. Generate and spawn the items
+                java.util.List<ItemStack> drops = lootTable.getRandomItems(lootParams);
+                if (drops.isEmpty()) {
+                    return;
+                }
 
-                    ItemStack stack = drops.getFirst().copyWithCount(1);
+                ItemStack stack = drops.getFirst().copyWithCount(1);
 
-                    // Create the ItemEntity manually
-                    net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(
-                            serverLevel,
-                            this.mob.getX(), this.mob.getY(), this.mob.getZ(),
-                            stack
-                    );
+                // Create the ItemEntity manually
+                net.minecraft.world.entity.item.ItemEntity itemEntity = new net.minecraft.world.entity.item.ItemEntity(
+                        serverLevel,
+                        this.mob.getX(), this.mob.getY(), this.mob.getZ(),
+                        stack
+                );
 
-                    // dont allow item pick up for 100 ticks, zombies might pick up what they just dropped
-                    itemEntity.setPickUpDelay(100);
+                // dont allow item pick up for 100 ticks, zombies might pick up what they just dropped
+                itemEntity.setPickUpDelay(100);
 
-                    // Give it a little "toss" so it doesn't just sit under the mob's feet
-                    double xVel = (this.mob.getRandom().nextDouble() - 0.5) * 0.2;
-                    double zVel = (this.mob.getRandom().nextDouble() - 0.5) * 0.2;
-                    itemEntity.setDeltaMovement(xVel, 0.4, zVel);
+                // Give it a little "toss" so it doesn't just sit under the mob's feet
+                double xVel = (this.mob.getRandom().nextDouble() - 0.5) * 0.2;
+                double zVel = (this.mob.getRandom().nextDouble() - 0.5) * 0.2;
+                itemEntity.setDeltaMovement(xVel, 0.4, zVel);
 
-                    serverLevel.addFreshEntity(itemEntity);
-                    fearDropTracker.hearthguard$setDroppedFearItem(true);
-                });
+                serverLevel.addFreshEntity(itemEntity);
+                fearDropTracker.hearthguard$setDroppedFearItem(true);
             }
         }
     }
@@ -358,7 +357,7 @@ public class FleeCampfireGoal extends Goal {
     }
 
     private void log(String msg) {
-        Identifier typeId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
+        ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
         String typeStr = typeId != null ? typeId.toString() : "<unknown>";
         String fullMsg = "%s:%s [%s] %s".formatted(mob.getDisplayName().getString(), mob.getId(), typeStr, msg);
         LOGGER.debug(fullMsg);

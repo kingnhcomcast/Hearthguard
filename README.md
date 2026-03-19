@@ -30,7 +30,7 @@ Notes:
 
 ## Install
 
-1. Install Fabric Loader for Minecraft `1.21.11`
+1. Install Fabric Loader for Minecraft `1.21.1`
 2. Install Fabric API
 3. Drop the HearthGuard jar into your `mods` folder
 
@@ -48,11 +48,11 @@ Run client:
 
 ## Compatibility
 
-- Minecraft `1.21.11`
-- Fabric Loader `0.18.4`
-- Fabric API `0.141.3+1.21.11`
+- Minecraft `1.21.1`
+- Fabric Loader `0.18.2`
+- Fabric API `0.116.9+1.21.1`
 - Mod Menu `17.0.0-beta.2` (optional, for config UI)
-- Cloth Config `21.11.153` (optional, for config UI)
+- Cloth Config `15.0.130` (optional, for config UI)
 
 ## Known Issues
 
