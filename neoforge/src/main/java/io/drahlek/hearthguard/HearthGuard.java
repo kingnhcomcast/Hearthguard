@@ -1,14 +1,17 @@
 package io.drahlek.hearthguard;
 
 
-import io.drahlek.hearthguard.client.NeoForgeClientInit;
-import net.neoforged.api.distmarker.Dist;
+import io.drahlek.hearthguard.config.HearthguardConfig;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.fml.loading.FMLPaths;
 
-@Mod(Constants.MOD_ID)
+import static io.drahlek.hearthguard.Constants.MOD_ID;
+
+@Mod(MOD_ID)
 public class HearthGuard {
 
     public HearthGuard(IEventBus eventBus, ModContainer container) {
@@ -21,9 +24,15 @@ public class HearthGuard {
         Constants.LOG.info("Hello NeoForge world!");
         CommonClass.init();
 
-        if (FMLEnvironment.getDist() == Dist.CLIENT) {
-            NeoForgeClientInit.init(container);
-        }
+        HearthguardConfig.init(FMLPaths.CONFIGDIR.get().resolve(MOD_ID));
 
+        if (FMLEnvironment.getDist() == Dist.CLIENT) {
+            try {
+                Class<?> clazz = Class.forName("io.drahlek.hearthguard.client.NeoForgeClientInit");
+                clazz.getMethod("init", ModContainer.class).invoke(null, container);
+            } catch (ReflectiveOperationException e) {
+                throw new RuntimeException("Failed to initialize NeoForge client hooks", e);
+            }
+        }
     }
 }

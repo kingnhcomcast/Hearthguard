@@ -5,6 +5,12 @@ plugins {
 configurations {
     clientImplementation.extendsFrom(implementation)
     clientRuntimeOnly.extendsFrom(runtimeOnly)
+    commonClientJava {
+        canBeResolved = true
+    }
+    commonClientResources {
+        canBeResolved = true
+    }
 }
 
 repositories {
@@ -21,11 +27,15 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
     modImplementation "curse.maven:modmenu-308702:7441070"
-    modApi("me.shedaniel.cloth:cloth-config-fabric:21.11.153") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+//    modApi("me.shedaniel.cloth:cloth-config-fabric:21.11.153") {
+//        exclude(group: "net.fabricmc.fabric-api")
+//    }
+    modImplementation "me.shedaniel.cloth:cloth-config-fabric:21.11.153"
 
     modRuntimeOnly "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+
+    commonClientJava project(path: ':common', configuration: 'commonClientJava')
+    commonClientResources project(path: ':common', configuration: 'commonClientResources')
 }
 
 
@@ -63,6 +73,16 @@ loom {
             property "log4j.configurationFile", "classpath:log4j2.xml"
         }
     }
+}
+
+tasks.named('compileClientJava', JavaCompile) {
+    dependsOn(configurations.commonClientJava)
+    source(configurations.commonClientJava)
+}
+
+tasks.named('processClientResources') {
+    dependsOn(configurations.commonClientResources)
+    from(configurations.commonClientResources)
 }
 
 // Implement mcgradleconventions loader attribute

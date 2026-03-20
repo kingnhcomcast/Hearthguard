@@ -33,4 +33,6 @@ public interface IPlatformHelper {
 
         return isDevelopmentEnvironment() ? "development" : "production";
     }
+
+    String getModName(String modId);
 }
