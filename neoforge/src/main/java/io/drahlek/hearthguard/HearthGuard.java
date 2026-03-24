@@ -5,8 +5,6 @@ import io.drahlek.hearthguard.config.HearthguardConfig;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.fml.loading.FMLPaths;
 
 import static io.drahlek.hearthguard.Constants.MOD_ID;
@@ -25,14 +23,5 @@ public class HearthGuard {
         CommonClass.init();
 
         HearthguardConfig.init(FMLPaths.CONFIGDIR.get().resolve(MOD_ID));
-
-        if (FMLEnvironment.getDist() == Dist.CLIENT) {
-            try {
-                Class<?> clazz = Class.forName("io.drahlek.hearthguard.client.NeoForgeClientInit");
-                clazz.getMethod("init", ModContainer.class).invoke(null, container);
-            } catch (ReflectiveOperationException e) {
-                throw new RuntimeException("Failed to initialize NeoForge client hooks", e);
-            }
-        }
     }
 }

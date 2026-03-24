@@ -23,7 +23,6 @@
 *   **Optional fear drop** (mobs may panic and drop an item once)
 *   **Per-mob allowlist / blocklist**
 *   Fully **configurable**
-*   Optional in-game config UI via Mod Menu + Cloth Config
 
 ***
 
@@ -52,8 +51,6 @@ HearthGuard loads its config from:
 
 `config/hearthguard/config.json`
 
-Also accessible via in-game UI (if Mod Menu + Cloth Config are installed).
-
 ### Settings
 
 *   **Range** — Campfire detection distance (blocks)
@@ -77,7 +74,6 @@ Also accessible via in-game UI (if Mod Menu + Cloth Config are installed).
 *   Fabric Loader `0.18.4`
 *   Fabric API `0.141.3+1.21.11`
 *   Mod Menu `17.0.0-beta.2` _(optional)_
-*   Cloth Config `21.11.153` _(optional)_
 
 ***
 
