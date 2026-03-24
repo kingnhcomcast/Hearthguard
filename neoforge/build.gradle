@@ -66,12 +66,8 @@ tasks.named('jar', Jar) {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-repositories {
-    maven { url "https://maven.shedaniel.me/" }
-}
-
 dependencies {
-    implementation "me.shedaniel.cloth:cloth-config-neoforge:21.11.153"
+    implementation "curse.maven:cloth-config-348521:5729127"
     commonClientJava project(path: ':common', configuration: 'commonClientJava')
     commonClientResources project(path: ':common', configuration: 'commonClientResources')
 }

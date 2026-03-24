@@ -26,7 +26,7 @@ public class HearthGuard {
 
         HearthguardConfig.init(FMLPaths.CONFIGDIR.get().resolve(MOD_ID));
 
-        if (FMLEnvironment.getDist() == Dist.CLIENT) {
+        if (FMLEnvironment.dist == Dist.CLIENT) {
             try {
                 Class<?> clazz = Class.forName("io.drahlek.hearthguard.client.NeoForgeClientInit");
                 clazz.getMethod("init", ModContainer.class).invoke(null, container);

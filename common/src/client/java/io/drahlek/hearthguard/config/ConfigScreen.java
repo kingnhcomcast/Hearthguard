@@ -9,10 +9,9 @@ import me.shedaniel.clothconfig2.gui.entries.BooleanListEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -110,7 +109,7 @@ public class ConfigScreen {
         modCategory.getEntries().addFirst(toggleBtn);
     }
 
-    private static @NonNull Map<String, List<EntityType<?>>> getMobsByMod(IPlatformHelper platformHelper) {
+    private static Map<String, List<EntityType<?>>> getMobsByMod(IPlatformHelper platformHelper) {
         if(mobsByMod == null) {
             mobsByMod = new HashMap<>();
 
@@ -122,7 +121,7 @@ public class ConfigScreen {
                     continue;
                 }
 
-                Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+                ResourceLocation key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
 
                 String modid = platformHelper.getModName(key.getNamespace());
                 mobsByMod.computeIfAbsent(modid, k -> new ArrayList<>()).add(type);

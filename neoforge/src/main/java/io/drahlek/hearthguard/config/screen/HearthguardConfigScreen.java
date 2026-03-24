@@ -14,7 +14,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -82,8 +82,9 @@ public class HearthguardConfigScreen extends Screen {
         this.list = new ConfigList(this.minecraft, this.width, listHeight, listTop, 24);
         this.addWidget(this.list);
 
-        this.categoryButton = CycleButton.builder(value -> Component.literal(categoryLabels.getOrDefault(value, value)), selectedCategoryKey)
+        this.categoryButton = CycleButton.<String>builder(value -> Component.literal(categoryLabels.getOrDefault(value, value)))
                 .withValues(categoryKeys)
+                .withInitialValue(selectedCategoryKey)
                 .create(this.width / 2 - 110, 28, 220, 20, Component.literal("Category"),
                         (btn, value) -> {
                             selectedCategoryKey = value;
@@ -123,7 +124,7 @@ public class HearthguardConfigScreen extends Screen {
                 continue;
             }
 
-            Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+            ResourceLocation key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
             if (key == null) {
                 continue;
             }
@@ -178,8 +179,9 @@ public class HearthguardConfigScreen extends Screen {
                 value -> dropChanceValue = value,
                 value -> Component.literal("Drop Item Chance: " + value + "%"));
 
-        CycleButton<HearthguardConfig.Mode> modeButton = CycleButton.builder(mode -> Component.literal(mode.name()), modeValue)
+        CycleButton<HearthguardConfig.Mode> modeButton = CycleButton.<HearthguardConfig.Mode>builder(mode -> Component.literal(mode.name()))
                 .withValues(HearthguardConfig.Mode.values())
+                .withInitialValue(modeValue)
                 .create(0, 0, 200, 20, Component.literal("Mode"),
                         (btn, value) -> modeValue = value);
 
@@ -206,7 +208,7 @@ public class HearthguardConfigScreen extends Screen {
         }
 
         for (EntityType<?> type : mobs) {
-            Identifier key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+            ResourceLocation key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
             if (key == null) {
                 continue;
             }
@@ -259,11 +261,11 @@ public class HearthguardConfigScreen extends Screen {
         boolean allSelected = mobs.stream()
                 .map(type -> BuiltInRegistries.ENTITY_TYPE.getKey(type))
                 .filter(id -> id != null)
-                .map(Identifier::toString)
+                .map(ResourceLocation::toString)
                 .allMatch(selectedMobs::contains);
 
         for (EntityType<?> type : mobs) {
-            Identifier id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
+            ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(type);
             if (id == null) {
                 continue;
             }
@@ -285,7 +287,7 @@ public class HearthguardConfigScreen extends Screen {
         boolean allSelected = !mobs.isEmpty() && mobs.stream()
                 .map(type -> BuiltInRegistries.ENTITY_TYPE.getKey(type))
                 .filter(id -> id != null)
-                .map(Identifier::toString)
+                .map(ResourceLocation::toString)
                 .allMatch(selectedMobs::contains);
 
         selectAllButton.active = !mobs.isEmpty();
@@ -383,7 +385,7 @@ public class HearthguardConfigScreen extends Screen {
         }
 
         @Override
-        protected int scrollBarX() {
+        protected int getScrollbarPosition() {
             return this.getRowRight() + 6 + 2;
         }
 
@@ -403,11 +405,12 @@ public class HearthguardConfigScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
-                int width = Math.min(getContentWidth(), 320);
-                int left = getContentX() + (getContentWidth() - width) / 2;
+            public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX,
+                               int mouseY, boolean hovered, float partialTick) {
+                int width = Math.min(entryWidth, 320);
+                int left = x + (entryWidth - width) / 2;
                 widget.setX(left);
-                widget.setY(getContentY());
+                widget.setY(y);
                 widget.setWidth(width);
                 widget.render(graphics, mouseX, mouseY, partialTick);
             }
@@ -435,15 +438,20 @@ public class HearthguardConfigScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
-                int labelX = getContentX() + 4;
-                int labelY = getContentY() + 6;
+            public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX,
+                               int mouseY, boolean hovered, float partialTick) {
+                int width = Math.min(entryWidth, 320);
+                int left = x + (entryWidth - width) / 2;
+                int right = left + width;
+
+                int labelX = left + 4;
+                int labelY = y + 6;
                 graphics.drawString(font, label, labelX, labelY, 0xFFFFFF, false);
 
                 int boxWidth = 80;
-                int boxX = getContentRight() - boxWidth - 4;
+                int boxX = right - boxWidth - 4;
                 box.setX(boxX);
-                box.setY(getContentY());
+                box.setY(y);
                 box.setWidth(boxWidth);
                 box.render(graphics, mouseX, mouseY, partialTick);
             }
@@ -469,8 +477,12 @@ public class HearthguardConfigScreen extends Screen {
             }
 
             @Override
-            public void renderContent(GuiGraphics graphics, int mouseX, int mouseY, boolean hovered, float partialTick) {
-                graphics.drawCenteredString(font, text, getContentXMiddle(), getContentY() + 6, 0xAAAAAA);
+            public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX,
+                               int mouseY, boolean hovered, float partialTick) {
+                int width = Math.min(entryWidth, 320);
+                int left = x + (entryWidth - width) / 2;
+                int centerX = left + width / 2;
+                graphics.drawCenteredString(font, text, centerX, y + 6, 0xAAAAAA);
             }
 
             @Override
