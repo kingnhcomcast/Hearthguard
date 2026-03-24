@@ -23,4 +23,11 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
 
         return !FMLLoader.getCurrent().isProduction();
     }
+
+    @Override
+    public String getModName(String modId) {
+        return net.neoforged.fml.ModList.get().getModContainerById(modId)
+                .map(container -> container.getModInfo().getDisplayName())
+                .orElse(modId);
+    }
 }

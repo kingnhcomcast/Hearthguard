@@ -56,6 +56,7 @@ public class HearthguardConfig {
         return INSTANCE;
     }
 
+    //TODO get path from IPlatformHelper
     public static void init(Path path) {
         HearthguardConfig.path = path;
         Path configDir = path.resolve(Constants.MOD_ID);

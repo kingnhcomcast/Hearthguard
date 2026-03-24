@@ -4,6 +4,39 @@ plugins {
     id 'org.spongepowered.mixin' version '0.7-SNAPSHOT'
     id 'idea'
 }
+
+sourceSets {
+    client {
+        java.srcDir 'src/client/java'
+        resources.srcDir 'src/client/resources'
+    }
+}
+
+configurations {
+    clientImplementation.extendsFrom(implementation)
+    clientCompileOnly.extendsFrom(compileOnly)
+    clientAnnotationProcessor.extendsFrom(annotationProcessor)
+    clientRuntimeOnly.extendsFrom(runtimeOnly)
+    commonClientJava {
+        canBeResolved = true
+    }
+    commonClientResources {
+        canBeResolved = true
+    }
+}
+
+sourceSets.main {
+    compileClasspath += sourceSets.client.output
+    runtimeClasspath += sourceSets.client.output
+}
+
+jar {
+    from sourceSets.client.output
+}
+
+sourcesJar {
+    from sourceSets.client.allSource
+}
 base {
     archivesName = "${mod_name}-forge-${minecraft_version}"
 }
@@ -72,9 +105,16 @@ minecraft {
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
+repositories {
+    maven { url "https://maven.shedaniel.me/" }
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
+    commonClientJava project(path: ':common', configuration: 'commonClientJava')
+    commonClientResources project(path: ':common', configuration: 'commonClientResources')
+    implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:15.0.130")
 }
 
 publishing {
@@ -89,6 +129,16 @@ sourceSets.each {
     def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
     it.output.resourcesDir = dir
     it.java.destinationDirectory = dir
+}
+
+tasks.named('compileClientJava', JavaCompile) {
+    dependsOn(configurations.commonClientJava)
+    source(configurations.commonClientJava)
+}
+
+tasks.named('processClientResources') {
+    dependsOn(configurations.commonClientResources)
+    from(configurations.commonClientResources)
 }
 
 // Implement mcgradleconventions loader attribute

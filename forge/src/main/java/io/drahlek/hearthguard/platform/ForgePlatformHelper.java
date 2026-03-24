@@ -23,4 +23,11 @@ public class ForgePlatformHelper implements IPlatformHelper {
 
         return !FMLLoader.isProduction();
     }
+
+    @Override
+    public String getModName(String modId) {
+        return net.minecraftforge.fml.ModList.get().getModContainerById(modId)
+                .map(container -> container.getModInfo().getDisplayName())
+                .orElse(modId);
+    }
 }

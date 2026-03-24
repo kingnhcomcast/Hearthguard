@@ -3,6 +3,25 @@ plugins {
     id 'net.neoforged.moddev'
 }
 
+sourceSets {
+    client {
+        java.srcDir 'src/client/java'
+        resources.srcDir 'src/client/resources'
+        // Inherit everything from main so you can see your Common code
+        compileClasspath += sourceSets.main.runtimeClasspath
+        runtimeClasspath += sourceSets.main.runtimeClasspath
+    }
+}
+
+configurations {
+    commonClientJava {
+        canBeResolved = true
+    }
+    commonClientResources {
+        canBeResolved = true
+    }
+}
+
 neoForge {
     version = neoforge_version
     // Automatically enable neoforge AccessTransformers if the file exists
@@ -36,11 +55,27 @@ neoForge {
     mods {
         "${mod_id}" {
             sourceSet sourceSets.main
+            sourceSet sourceSets.client
         }
     }
 }
 
+tasks.named('jar', Jar) {
+    from sourceSets.client.output
+}
+
 sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    maven { url "https://maven.shedaniel.me/" }
+}
+
+dependencies {
+    implementation "me.shedaniel.cloth:cloth-config-neoforge:21.11.153"
+    commonClientJava project(path: ':common', configuration: 'commonClientJava')
+    commonClientResources project(path: ':common', configuration: 'commonClientResources')
+}
+
 
 // Implement mcgradleconventions loader attribute
 def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
@@ -59,4 +94,14 @@ sourceSets.configureEach {
             }
         }
     }
+}
+
+tasks.named('compileClientJava', JavaCompile) {
+    dependsOn(configurations.commonClientJava)
+    source(configurations.commonClientJava)
+}
+
+tasks.named('processClientResources') {
+    dependsOn(configurations.commonClientResources)
+    from(configurations.commonClientResources)
 }
