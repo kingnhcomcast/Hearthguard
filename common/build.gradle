@@ -43,11 +43,17 @@ neoForge {
     }
 }
 
+repositories {
+    maven { url "https://maven.shedaniel.me/" }
+}
+
 // Ensure the dependencies are shared
 dependencies {
     compileOnly group: 'org.spongepowered', name: 'mixin', version: '0.8.5'
     compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
     annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
+
+    compileOnly("me.shedaniel.cloth:cloth-config-neoforge:21.11.153")
 }
 
 // Link the client output to the main JAR for the loaders to pick up

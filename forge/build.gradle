@@ -105,12 +105,16 @@ minecraft {
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
+repositories {
+    maven { url "https://maven.shedaniel.me/" }
+}
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
     annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT:processor")
     commonClientJava project(path: ':common', configuration: 'commonClientJava')
     commonClientResources project(path: ':common', configuration: 'commonClientResources')
+    implementation fg.deobf("me.shedaniel.cloth:cloth-config-forge:15.0.130")
 }
 
 publishing {
