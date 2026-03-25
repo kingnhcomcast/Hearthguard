@@ -12,7 +12,7 @@
         "sources": "https://github.com/kingnhcomcast/Hearthguard"
     },
     "license": "${license}",
-    "icon": "assets/hearthguard/${mod_id}.png",
+    "icon": "assets/hearthguard/icon.png",
     "environment": "*",
     "entrypoints": {
         "main": [
