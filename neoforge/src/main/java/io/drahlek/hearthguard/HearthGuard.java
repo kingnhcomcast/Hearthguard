@@ -24,9 +24,8 @@ public class HearthGuard {
 
         // Use NeoForge to bootstrap the Common mod.
         Constants.LOG.info("Hello NeoForge world!");
-        CommonClass.init();
 
-        HearthguardConfig.init(FMLPaths.CONFIGDIR.get());
+        HearthguardConfig.load(FMLPaths.CONFIGDIR.get());
         eventBus.addListener(HearthGuardNetworking::registerPayloads);
         NeoForge.EVENT_BUS.register(NeoForgeEventHandlers.class);
 

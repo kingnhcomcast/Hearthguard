@@ -22,9 +22,8 @@ public class HearthGuard {
 
         // Use Forge to bootstrap the Common mod.
         Constants.LOG.info("Hello Forge world!");
-        CommonClass.init();
 
-        HearthguardConfig.init(FMLPaths.CONFIGDIR.get());
+        HearthguardConfig.load(FMLPaths.CONFIGDIR.get());
         HearthGuardNetworking.init();
 
         DistExecutor.safeRunWhenOn(Dist.CLIENT, () -> ForgeClientInit::init);

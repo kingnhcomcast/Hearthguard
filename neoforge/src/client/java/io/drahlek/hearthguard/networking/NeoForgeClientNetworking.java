@@ -4,7 +4,7 @@ import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 
 public class NeoForgeClientNetworking implements IClientNetworking {
     @Override
-    public void send(ConfigPayload payload) {
+    public void sendToServer(ConfigPayload payload) {
         ClientPacketDistributor.sendToServer(payload);
     }
 }

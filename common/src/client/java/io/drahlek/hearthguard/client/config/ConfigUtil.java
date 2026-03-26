@@ -1,4 +1,4 @@
-package io.drahlek.hearthguard.config;
+package io.drahlek.hearthguard.client.config;
 
 
 import net.minecraft.client.Minecraft;

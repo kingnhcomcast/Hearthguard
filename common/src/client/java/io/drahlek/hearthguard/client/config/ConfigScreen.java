@@ -1,5 +1,6 @@
-package io.drahlek.hearthguard.config;
+package io.drahlek.hearthguard.client.config;
 
+import io.drahlek.hearthguard.config.HearthguardConfig;
 import io.drahlek.hearthguard.networking.IClientNetworking;
 import io.drahlek.hearthguard.networking.ConfigPayload;
 import io.drahlek.hearthguard.platform.services.IPlatformHelper;
@@ -234,6 +235,6 @@ public class ConfigScreen {
 
     private static void sendConfigToServer(HearthguardConfig config) {
         ConfigPayload payload = new ConfigPayload(config);
-        networking.send(payload);
+        networking.sendToServer(payload);
     }
 }

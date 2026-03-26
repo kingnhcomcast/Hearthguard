@@ -61,48 +61,39 @@ public class HearthguardConfig {
         INSTANCE.syncModeEnum();
     }
 
-
-//    public static void loadFromString(String json) {
-//        try {
-//            // 1. Deserialize the string into the INSTANCE
-//            INSTANCE = GSON.fromJson(json, HearthguardConfig.class);
-//
-//            // 2. Handle the transient enum sync
-//            INSTANCE.syncModeEnum();
-//        } catch (Exception e) {
-//            Constants.LOG.error("Failed to deserialize config string!", e);
-//            // Fallback to default if deserialization fails completely
-//            if (INSTANCE == null) {
-//                INSTANCE = new HearthguardConfig();
-//            }
-//        }
-//    }
-
     //TODO get path from IPlatformHelper
-    public static void init(Path path) {
+    public static void load(Path path) {
         HearthguardConfig.path = path;
-        Path configDir = path.resolve(Constants.MOD_ID);
-        Path file = configDir.resolve("config.json");
+        load();
+    }
 
-        try {
-            if (Files.exists(file)) {
-                try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(file))) {
-                    INSTANCE = GSON.fromJson(reader, HearthguardConfig.class);
+    public static void load() {
+        if(path != null) {
+            Path configDir = path.resolve(Constants.MOD_ID);
+            Path file = configDir.resolve("config.json");
+
+            try {
+                if (Files.exists(file)) {
+                    try (InputStreamReader reader = new InputStreamReader(Files.newInputStream(file))) {
+                        INSTANCE = GSON.fromJson(reader, HearthguardConfig.class);
+                    }
                 }
+            } catch (Exception e) {
+                Constants.LOG.error("Failed to load config from {}", file, e);
             }
-        } catch (Exception e) {
-            Constants.LOG.error("Failed to load config from {}", file, e);
+
+            // If file didn't exist or loading failed, use defaults
+            if (INSTANCE == null) {
+                INSTANCE = new HearthguardConfig();
+            }
+
+            INSTANCE.syncModeEnum();
+
+            // Save once to ensure the directory and file exist for the player
+            INSTANCE.save();
+        } else {
+            Constants.LOG.error("Failed to load config from {} path not set", Constants.MOD_ID);
         }
-
-        // If file didn't exist or loading failed, use defaults
-        if (INSTANCE == null) {
-            INSTANCE = new HearthguardConfig();
-        }
-
-        INSTANCE.syncModeEnum();
-
-        // Save once to ensure the directory and file exist for the player
-        INSTANCE.save();
     }
 
     // =====================

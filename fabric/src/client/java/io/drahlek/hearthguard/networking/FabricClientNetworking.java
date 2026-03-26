@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 
 public class FabricClientNetworking implements IClientNetworking {
     @Override
-    public void send(ConfigPayload payload) {
+    public void sendToServer(ConfigPayload payload) {
         ClientPlayNetworking.send(payload);
     }
 }

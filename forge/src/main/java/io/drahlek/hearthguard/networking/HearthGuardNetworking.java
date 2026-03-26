@@ -27,7 +27,7 @@ public final class HearthGuardNetworking {
             HearthguardConfig.getInstance().save();
             broadcastConfig();
         });
-        PLAY_FLOW.clientbound().addMain(ConfigPayload.ID, ConfigPayload.CODEC,
+        PLAY_FLOW.clientbound().addMain(ConfigSyncPayload.ID, ConfigSyncPayload.CODEC,
                 (payload, context) -> HearthguardConfig.setInstance(payload.config()));
     }
 
@@ -44,11 +44,11 @@ public final class HearthGuardNetworking {
         if (player == null) {
             return;
         }
-        CHANNEL.send(new ConfigPayload(HearthguardConfig.getInstance()),
+        CHANNEL.send(new ConfigSyncPayload(HearthguardConfig.getInstance()),
                 PacketDistributor.PLAYER.with(player));
     }
 
     private static void broadcastConfig() {
-        CHANNEL.send(new ConfigPayload(HearthguardConfig.getInstance()), PacketDistributor.ALL.noArg());
+        CHANNEL.send(new ConfigSyncPayload(HearthguardConfig.getInstance()), PacketDistributor.ALL.noArg());
     }
 }

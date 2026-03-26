@@ -14,4 +14,9 @@ public final class ForgeEventHandlers {
             HearthGuardNetworking.sendToClient(player);
         }
     }
+
+    @SubscribeEvent
+    public static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
+        // No-op. This keeps the class multi-listener so Forge's migration helper accepts it.
+    }
 }
