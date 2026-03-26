@@ -17,7 +17,7 @@ public class ButtonEntry extends AbstractConfigListEntry<Void> {
     private final Button button;
     private boolean isSelectAll = true;
 
-    public ButtonEntry(Component text, boolean isSelectAll, Consumer<Boolean> onPress) {
+    public ButtonEntry(Component text, boolean isSelectAll, boolean canEdit, Consumer<Boolean> onPress) {
         super(Component.empty(), false);
         this.isSelectAll = isSelectAll;
 
@@ -29,6 +29,7 @@ public class ButtonEntry extends AbstractConfigListEntry<Void> {
             // Update the button label
             btn.setMessage(Component.literal(this.isSelectAll ? "Select All" : "Deselect All"));
         }).bounds(0, 0, 150, 20).build();
+        this.button.active = canEdit;
     }
 
     @Override

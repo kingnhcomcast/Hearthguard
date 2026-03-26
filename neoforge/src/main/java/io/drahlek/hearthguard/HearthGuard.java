@@ -2,7 +2,9 @@ package io.drahlek.hearthguard;
 
 
 import io.drahlek.hearthguard.config.HearthguardConfig;
+import io.drahlek.hearthguard.networking.HearthGuardNetworking;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.api.distmarker.Dist;
@@ -24,7 +26,9 @@ public class HearthGuard {
         Constants.LOG.info("Hello NeoForge world!");
         CommonClass.init();
 
-        HearthguardConfig.init(FMLPaths.CONFIGDIR.get().resolve(MOD_ID));
+        HearthguardConfig.init(FMLPaths.CONFIGDIR.get());
+        eventBus.addListener(HearthGuardNetworking::registerPayloads);
+        NeoForge.EVENT_BUS.register(NeoForgeEventHandlers.class);
 
         if (FMLEnvironment.getDist() == Dist.CLIENT) {
             try {
@@ -35,4 +39,5 @@ public class HearthGuard {
             }
         }
     }
+
 }

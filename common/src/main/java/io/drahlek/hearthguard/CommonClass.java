@@ -27,5 +27,6 @@ public class CommonClass {
 
             Constants.LOG.info("Hello to hearthguard");
         }
+
     }
 }

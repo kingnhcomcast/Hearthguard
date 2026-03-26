@@ -1,6 +1,8 @@
 package io.drahlek.hearthguard.config.screen;
 
 import io.drahlek.hearthguard.config.HearthguardConfig;
+import io.drahlek.hearthguard.networking.ConfigPayload;
+import io.drahlek.hearthguard.networking.HearthGuardNetworking;
 import io.drahlek.hearthguard.util.MobRules;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,6 +20,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraftforge.network.PacketDistributor;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -301,7 +304,8 @@ public class HearthguardConfigScreen extends Screen {
 
         config.getMobs().clear();
         config.getMobs().addAll(selectedMobs);
-        config.save();
+        ConfigPayload payload = new ConfigPayload(config);
+        HearthGuardNetworking.CHANNEL.send(payload, PacketDistributor.SERVER.noArg());
 
         this.minecraft.setScreen(parent);
     }

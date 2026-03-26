@@ -22,8 +22,9 @@ public class HearthguardConfig {
 
     private static HearthguardConfig INSTANCE;
 
-
     private String mode = Mode.WHITELIST.name();
+    private transient Mode modeEnum = Mode.WHITELIST;
+
     private Set<String> mobs = new HashSet<>(Set.of(
             "minecraft:zombie",
             "minecraft:zombie_villager",
@@ -37,7 +38,6 @@ public class HearthguardConfig {
             "minecraft:cave_spider",
             "minecraft:slime"
     ));
-    private transient Mode modeEnum = Mode.WHITELIST;
     private int range = 8;
     @SerializedName("flee_fast_speed")
     private double fleeFastSpeed = 1.2;
@@ -55,6 +55,28 @@ public class HearthguardConfig {
         }
         return INSTANCE;
     }
+
+    public static void setInstance(HearthguardConfig config) {
+        INSTANCE = config != null ? config : new HearthguardConfig();
+        INSTANCE.syncModeEnum();
+    }
+
+
+//    public static void loadFromString(String json) {
+//        try {
+//            // 1. Deserialize the string into the INSTANCE
+//            INSTANCE = GSON.fromJson(json, HearthguardConfig.class);
+//
+//            // 2. Handle the transient enum sync
+//            INSTANCE.syncModeEnum();
+//        } catch (Exception e) {
+//            Constants.LOG.error("Failed to deserialize config string!", e);
+//            // Fallback to default if deserialization fails completely
+//            if (INSTANCE == null) {
+//                INSTANCE = new HearthguardConfig();
+//            }
+//        }
+//    }
 
     //TODO get path from IPlatformHelper
     public static void init(Path path) {
@@ -77,14 +99,7 @@ public class HearthguardConfig {
             INSTANCE = new HearthguardConfig();
         }
 
-        if (INSTANCE.mode != null) {
-            try {
-                INSTANCE.modeEnum = Mode.valueOf(INSTANCE.mode);
-            } catch (IllegalArgumentException e) {
-                INSTANCE.modeEnum = Mode.WHITELIST;
-                Constants.LOG.warn("Invalid config mode '{}', defaulting to {}", INSTANCE.mode, INSTANCE.modeEnum);
-            }
-        }
+        INSTANCE.syncModeEnum();
 
         // Save once to ensure the directory and file exist for the player
         INSTANCE.save();
@@ -127,6 +142,11 @@ public class HearthguardConfig {
         this.mode = modeEnum.name();
     }
 
+    public void setMode(String mode) {
+        this.mode = mode;
+        syncModeEnum();
+    }
+
     public Set<String> getMobs() {
         if (mobs == null) {
             mobs = new HashSet<>();
@@ -151,8 +171,6 @@ public class HearthguardConfig {
             Path configDir = path.resolve(Constants.MOD_ID);
             Files.createDirectories(configDir);
             file = configDir.resolve("config.json");
-
-            if (modeEnum != null) mode = modeEnum.name();
 
             try (Writer writer = Files.newBufferedWriter(file)) {
                 GSON.toJson(this, writer);
@@ -183,5 +201,18 @@ public class HearthguardConfig {
     // =====================
     public enum Mode {
         WHITELIST, BLACKLIST
+    }
+
+    private void syncModeEnum() {
+        if (mode != null) {
+            try {
+                modeEnum = Mode.valueOf(mode);
+            } catch (IllegalArgumentException e) {
+                modeEnum = Mode.WHITELIST;
+                Constants.LOG.warn("Invalid config mode '{}', defaulting to {}", mode, modeEnum);
+            }
+        } else {
+            modeEnum = Mode.WHITELIST;
+        }
     }
 }

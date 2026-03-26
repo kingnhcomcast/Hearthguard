@@ -1,5 +1,7 @@
 package io.drahlek.hearthguard.config;
 
+import io.drahlek.hearthguard.networking.IClientNetworking;
+import io.drahlek.hearthguard.networking.ConfigPayload;
 import io.drahlek.hearthguard.platform.services.IPlatformHelper;
 import io.drahlek.hearthguard.util.MobRules;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
@@ -24,39 +26,61 @@ import java.util.Set;
 
 public class ConfigScreen {
     private static Map<String, List<EntityType<?>>> mobsByMod = null;
+    private static IClientNetworking networking;
 
-    public static Screen createConfigScreen(Screen parent, IPlatformHelper platformHelper) {
+    public static Screen createConfigScreen(Screen parent, IPlatformHelper platformHelper, IClientNetworking networking) {
+        ConfigScreen.networking = networking;
+        Boolean canEdit = ConfigUtil.canEditConfig();
+
         HearthguardConfig config = HearthguardConfig.getInstance();
         Set<String> selectedMobs = new HashSet<>(config.getMobs());
         HearthguardConfig.Mode currentMode = config.getModeEnum() != null
                 ? config.getModeEnum() : HearthguardConfig.Mode.WHITELIST;
         ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(Component.literal("HearthGuard Options"));
+                .setTitle(canEdit
+                        ? Component.literal("HearthGuard Config")
+                        : Component.literal("HearthGuard Config (Read Only)"));
         ConfigEntryBuilder entryBuilder = builder.entryBuilder();
 
         //build general tab
-        buildGeneralTab(builder, entryBuilder, config, currentMode);
+        buildGeneralTab(builder, entryBuilder, config, currentMode, canEdit);
 
         //generate map of mobs per mod
         Map<String, List<EntityType<?>>> mobsByMod = getMobsByMod(platformHelper);
 
         //for each mod, build a tab of mobs
         for (String modid : mobsByMod.keySet()) {
-            buildMobSelectionTab(modid, builder, mobsByMod, selectedMobs, entryBuilder);
+            buildMobSelectionTab(modid, builder, mobsByMod, selectedMobs, entryBuilder, canEdit);
         }
 
         // Save config when pressing Done
         builder.setSavingRunnable(() -> {
+            if (!ConfigUtil.canEditConfig()) return;
             config.getMobs().clear();
             config.getMobs().addAll(selectedMobs);
-            config.save();
+            sendConfigToServer(config);
         });
+
+        //build info tab
+        if(!canEdit) {
+            ConfigCategory info = builder.getOrCreateCategory(
+                    Component.literal("Info")
+            );
+            if (!canEdit) {
+                info.addEntry(
+                        entryBuilder.startTextDescription(
+                                Component.literal("Settings are controlled by the server (OP only)")
+                                        .withStyle(style -> style.withColor(0xFF5555))
+                        ).build()
+                );
+            }
+        }
 
         return builder.build();
     }
 
-    private static void buildMobSelectionTab(String modid, ConfigBuilder builder, Map<String, List<EntityType<?>>> mobsByMod, Set<String> selectedMobs, ConfigEntryBuilder entryBuilder) {
+    private static void buildMobSelectionTab(String modid, ConfigBuilder builder, Map<String, List<EntityType<?>>> mobsByMod, Set<String> selectedMobs, ConfigEntryBuilder entryBuilder, Boolean canEdit) {
         // ===== Mob List =====
         List<BooleanListEntry> mobEntries = new ArrayList<>();
 
@@ -68,17 +92,19 @@ public class ConfigScreen {
 
             boolean selected = selectedMobs.contains(longName);
 
-            BooleanListEntry entry =
-                    entryBuilder.startBooleanToggle(Component.literal(displayName), selected)
-                            .setDefaultValue(false)
-                            .setSaveConsumer(sel -> {
-                                if (sel) {
-                                    selectedMobs.add(longName);
-                                }
-                                else {
-                                    selectedMobs.remove(longName);
-                                }
-                            })
+        BooleanListEntry entry =
+                entryBuilder.startBooleanToggle(Component.literal(displayName), selected)
+                        .setDefaultValue(false)
+                        .setRequirement(() -> canEdit)
+                        .setSaveConsumer(sel -> {
+                            if (sel) {
+                                selectedMobs.add(longName);
+                            }
+                            else {
+                                selectedMobs.remove(longName);
+                            }
+                        })
+
                             .build();
 
             mobEntries.add(entry);
@@ -87,7 +113,7 @@ public class ConfigScreen {
 
         boolean allSelected = !mobEntries.isEmpty() && mobEntries.stream().allMatch(BooleanListEntry::getValue);
         String label = allSelected ? "Deselect All" : "Select All";
-        ButtonEntry toggleBtn = new ButtonEntry(Component.literal(label), !allSelected, (shouldSelect) -> {
+        ButtonEntry toggleBtn = new ButtonEntry(Component.literal(label), !allSelected, canEdit, (shouldSelect) -> {
             // 1. Update the actual config data immediately
             List<EntityType<?>> mobs = mobsByMod.get(modid);
             if (shouldSelect) {
@@ -137,13 +163,14 @@ public class ConfigScreen {
         return mobsByMod;
     }
 
-    private static void buildGeneralTab(ConfigBuilder builder, ConfigEntryBuilder entryBuilder, HearthguardConfig config, HearthguardConfig.Mode currentMode) {
+    private static void buildGeneralTab(ConfigBuilder builder, ConfigEntryBuilder entryBuilder, HearthguardConfig config, HearthguardConfig.Mode currentMode, Boolean canEdit) {
         ConfigCategory general = builder.getOrCreateCategory(Component.literal("General"));
 
         // Range slider (int)
         general.addEntry(
                 entryBuilder.startIntSlider(Component.literal("Range"), config.getRange(), 3, 32)
                         .setDefaultValue(8)
+                        .setRequirement(() -> canEdit)
                         .setSaveConsumer(config::setRange)
                         .build()
         );
@@ -152,6 +179,7 @@ public class ConfigScreen {
         general.addEntry(
                 entryBuilder.startDoubleField(Component.literal("Flee Slow Speed"), config.getFleeSlowSpeed())
                         .setDefaultValue(1.0)
+                        .setRequirement(() -> canEdit)
                         .setSaveConsumer(value -> config.setFleeSlowSpeed(Math.min(Math.max(value, 0.1), 2.0)))
                         .build()
         );
@@ -160,6 +188,7 @@ public class ConfigScreen {
         general.addEntry(
                 entryBuilder.startDoubleField(Component.literal("Flee Fast Speed"), config.getFleeFastSpeed())
                         .setDefaultValue(1.2)
+                        .setRequirement(() -> canEdit)
                         .setSaveConsumer(value -> config.setFleeFastSpeed(Math.min(Math.max(value, 0.1), 2.0)))
                         .build()
         );
@@ -167,6 +196,7 @@ public class ConfigScreen {
         general.addEntry(
                 entryBuilder.startIntSlider(Component.literal("Drop Item Chance"), config.getDropItemChance(), 0, 100)
                         .setDefaultValue(25)
+                        .setRequirement(() -> canEdit)
                         .setTextGetter(value -> Component.literal(value + "%"))
                         .setSaveConsumer(config::setDropItemChance)
                         .build()
@@ -176,6 +206,7 @@ public class ConfigScreen {
         general.addEntry(
                 entryBuilder.startEnumSelector(Component.literal("Mode"), HearthguardConfig.Mode.class, currentMode)
                         .setDefaultValue(HearthguardConfig.Mode.WHITELIST)
+                        .setRequirement(() -> canEdit)
                         .setSaveConsumer(config::setModeEnum)
                         .build()
         );
@@ -200,5 +231,9 @@ public class ConfigScreen {
             e.printStackTrace();
         }
     }
-}
 
+    private static void sendConfigToServer(HearthguardConfig config) {
+        ConfigPayload payload = new ConfigPayload(config);
+        networking.send(payload);
+    }
+}
