@@ -2,7 +2,6 @@ package io.drahlek.hearthguard.client.config;
 
 
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -33,7 +32,8 @@ public class ButtonEntry extends AbstractConfigListEntry<Void> {
     }
 
     @Override
-    public void render(GuiGraphics graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float tickDelta) {
+    public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float tickDelta) {
+        super.extractRenderState(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isHovered, tickDelta);
         // 1. Fix the width to match the standard boolean toggle (150px)
         int fixedWidth = 100;
         this.button.setWidth(fixedWidth + 14);
@@ -44,9 +44,10 @@ public class ButtonEntry extends AbstractConfigListEntry<Void> {
 
         this.button.setX(x + entryWidth - fixedWidth - 50 );
         this.button.setY(y);
+        this.button.active = isEditable();
 
         // 3. Render the button
-        this.button.render(graphics, mouseX, mouseY, tickDelta);
+        this.button.extractRenderState(graphics, mouseX, mouseY, tickDelta);
     }
 
     // Required for the button to register hover/interaction in 1.21.11

@@ -37,9 +37,11 @@ neoForge {
     if (at.exists()) {
         accessTransformers.from(at.absolutePath)
     }
-    parchment {
-        minecraftVersion = parchment_minecraft
-        mappingsVersion = parchment_version
+    if (parchment_minecraft?.trim() && parchment_version?.trim()) {
+        parchment {
+            minecraftVersion = parchment_minecraft
+            mappingsVersion = parchment_version
+        }
     }
 }
 
@@ -53,7 +55,7 @@ dependencies {
     compileOnly group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
     annotationProcessor group: 'io.github.llamalad7', name: 'mixinextras-common', version: '0.3.5'
 
-    compileOnly("me.shedaniel.cloth:cloth-config-neoforge:21.11.153")
+    compileOnly("me.shedaniel.cloth:cloth-config-neoforge:26.1.154")
 }
 
 // Link the client output to the main JAR for the loaders to pick up

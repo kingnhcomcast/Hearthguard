@@ -71,7 +71,7 @@ repositories {
 }
 
 dependencies {
-    implementation "me.shedaniel.cloth:cloth-config-neoforge:21.11.153"
+    implementation "me.shedaniel.cloth:cloth-config-neoforge:26.1.154"
     commonClientJava project(path: ':common', configuration: 'commonClientJava')
     commonClientResources project(path: ':common', configuration: 'commonClientResources')
 }

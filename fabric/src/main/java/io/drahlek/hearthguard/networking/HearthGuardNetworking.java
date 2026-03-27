@@ -14,8 +14,8 @@ public class HearthGuardNetworking {
 
     public static void init() {
         //register payloads
-        PayloadTypeRegistry.playC2S().register(ConfigPayload.ID, ConfigPayload.CODEC);
-        PayloadTypeRegistry.playS2C().register(ConfigPayload.ID, ConfigPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(ConfigPayload.ID, ConfigPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ConfigPayload.ID, ConfigPayload.CODEC);
 
         //handler for receiving a ConfigPayload
         ServerPlayNetworking.registerGlobalReceiver(ConfigPayload.ID, (payload, context) -> {
