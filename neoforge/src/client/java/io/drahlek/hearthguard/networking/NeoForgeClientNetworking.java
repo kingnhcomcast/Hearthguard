@@ -1,10 +1,10 @@
 package io.drahlek.hearthguard.networking;
 
-import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class NeoForgeClientNetworking implements IClientNetworking {
     @Override
     public void sendToServer(ConfigPayload payload) {
-        ClientPacketDistributor.sendToServer(payload);
+        PacketDistributor.sendToServer(payload);
     }
 }

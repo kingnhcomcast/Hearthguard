@@ -7,13 +7,13 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public record ConfigSyncPayload(HearthguardConfig config) implements CustomPacketPayload {
     public static Gson GSON = new Gson();
 
-    public static final Identifier SYNC_CONFIG_ID =
-            Identifier.fromNamespaceAndPath(Constants.MOD_ID, "sync_config");
+    public static final ResourceLocation SYNC_CONFIG_ID =
+            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, "sync_config");
     public static final CustomPacketPayload.Type<ConfigSyncPayload> ID = new CustomPacketPayload.Type<>(SYNC_CONFIG_ID);
     public static final StreamCodec<RegistryFriendlyByteBuf, ConfigSyncPayload> CODEC =
             StreamCodec.composite(

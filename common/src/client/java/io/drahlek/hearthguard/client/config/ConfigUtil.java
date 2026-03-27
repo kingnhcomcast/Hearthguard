@@ -2,7 +2,6 @@ package io.drahlek.hearthguard.client.config;
 
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.permissions.Permissions;
 
 public class ConfigUtil {
     public static boolean canEditConfig() {
@@ -21,7 +20,7 @@ public class ConfigUtil {
             return false;
         }
 
-        return minecraft.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+        return minecraft.player.hasPermissions(2);
     }
 }
 

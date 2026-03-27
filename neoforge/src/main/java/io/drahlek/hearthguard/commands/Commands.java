@@ -1,7 +1,6 @@
 package io.drahlek.hearthguard.commands;
 
 import io.drahlek.hearthguard.Constants;
-import net.minecraft.server.permissions.Permissions;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 
@@ -14,17 +13,9 @@ public class Commands {
 
     private static void register(RegisterCommandsEvent event) {
         event.getDispatcher().register(
-                literal(Constants.MOD_ID)
+                    literal(Constants.MOD_ID)
                         .then(literal("reload")
-                                .requires(source -> {
-                                    var player = source.getPlayer();
-                                    if (player == null) {
-                                        return false;
-                                    }
-                                    return source.getServer()
-                                            .getProfilePermissions(player.nameAndId())
-                                            .hasPermission(Permissions.COMMANDS_MODERATOR);
-                                })
+                                .requires(source -> source.hasPermission(2))
                                 .executes(ReloadConfigCommand::run)
                         )
         );

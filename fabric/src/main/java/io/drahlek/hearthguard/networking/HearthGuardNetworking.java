@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.permissions.Permissions;
 
 //TODO not all of this should be here. keep just networking
 public class HearthGuardNetworking {
@@ -20,7 +19,7 @@ public class HearthGuardNetworking {
         //handler for receiving a ConfigPayload
         ServerPlayNetworking.registerGlobalReceiver(ConfigPayload.ID, (payload, context) -> {
             context.server().execute(() -> {
-                if (!context.player().createCommandSourceStack().permissions().hasPermission(Permissions.COMMANDS_MODERATOR)) {
+                if (!context.player().hasPermissions(2)) {
                     Constants.LOG.warn("Config sync: denied update from {}", context.player().getName().getString());
                     return;
                 }

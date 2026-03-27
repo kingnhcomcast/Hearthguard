@@ -49,7 +49,7 @@ public class ButtonEntry extends AbstractConfigListEntry<Void> {
         this.button.render(graphics, mouseX, mouseY, tickDelta);
     }
 
-    // Required for the button to register hover/interaction in 1.21.11
+        // Required for the button to register hover/interaction in 1.21.1
     @Override
     public boolean isMouseOver(double mouseX, double mouseY) {
         return this.button.isMouseOver(mouseX, mouseY);
