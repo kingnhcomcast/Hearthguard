@@ -1,8 +1,11 @@
 package io.drahlek.hearthguard;
 
 
+import io.drahlek.hearthguard.commands.Commands;
 import io.drahlek.hearthguard.config.HearthguardConfig;
+import io.drahlek.hearthguard.networking.HearthGuardNetworking;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.api.distmarker.Dist;
@@ -22,9 +25,11 @@ public class HearthGuard {
 
         // Use NeoForge to bootstrap the Common mod.
         Constants.LOG.info("Hello NeoForge world!");
-        CommonClass.init();
 
-        HearthguardConfig.init(FMLPaths.CONFIGDIR.get().resolve(MOD_ID));
+        HearthguardConfig.load(FMLPaths.CONFIGDIR.get());
+        Commands.init();
+        eventBus.addListener(HearthGuardNetworking::registerPayloads);
+        NeoForge.EVENT_BUS.register(NeoForgeEventHandlers.class);
 
         if (FMLEnvironment.dist == Dist.CLIENT) {
             try {
@@ -35,4 +40,5 @@ public class HearthGuard {
             }
         }
     }
+
 }

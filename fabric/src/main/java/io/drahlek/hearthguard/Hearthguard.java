@@ -1,6 +1,8 @@
 package io.drahlek.hearthguard;
 
+import io.drahlek.hearthguard.commands.Commands;
 import io.drahlek.hearthguard.config.HearthguardConfig;
+import io.drahlek.hearthguard.networking.HearthGuardNetworking;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
@@ -13,6 +15,8 @@ public class Hearthguard implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        HearthguardConfig.init(FabricLoader.getInstance().getConfigDir().resolve(MOD_ID));
+        HearthguardConfig.load(FabricLoader.getInstance().getConfigDir());
+        HearthGuardNetworking.init();
+        Commands.init();
     }
 }
