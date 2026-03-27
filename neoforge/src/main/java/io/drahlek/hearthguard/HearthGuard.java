@@ -1,6 +1,7 @@
 package io.drahlek.hearthguard;
 
 
+import io.drahlek.hearthguard.commands.Commands;
 import io.drahlek.hearthguard.config.HearthguardConfig;
 import io.drahlek.hearthguard.networking.HearthGuardNetworking;
 import net.neoforged.bus.api.IEventBus;
@@ -26,6 +27,7 @@ public class HearthGuard {
         Constants.LOG.info("Hello NeoForge world!");
 
         HearthguardConfig.load(FMLPaths.CONFIGDIR.get());
+        Commands.init();
         eventBus.addListener(HearthGuardNetworking::registerPayloads);
         NeoForge.EVENT_BUS.register(NeoForgeEventHandlers.class);
 
