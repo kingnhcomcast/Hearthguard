@@ -16,7 +16,15 @@ public class Commands {
         event.getDispatcher().register(
                 literal(Constants.MOD_ID)
                         .then(literal("reload")
-                                .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_MODERATOR))
+                                .requires(source -> {
+                                    var player = source.getPlayer();
+                                    if (player == null) {
+                                        return false;
+                                    }
+                                    return source.getServer()
+                                            .getProfilePermissions(player.nameAndId())
+                                            .hasPermission(Permissions.COMMANDS_MODERATOR);
+                                })
                                 .executes(ReloadConfigCommand::run)
                         )
         );
