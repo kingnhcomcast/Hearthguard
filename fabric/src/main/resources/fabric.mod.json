@@ -36,7 +36,8 @@
         "java": ">=${java_version}"
     },
     "suggests": {
-        "another-mod": "*"
+        "cloth-config": ">=26.1.154",
+        "modmenu": "*"
     }
 }
   

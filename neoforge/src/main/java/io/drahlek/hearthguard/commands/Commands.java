@@ -19,7 +19,8 @@ public class Commands {
                                 .requires(source -> {
                                     var player = source.getPlayer();
                                     if (player == null) {
-                                        return false;
+                                        //console if no player, always allow as running on server
+                                        return true;
                                     }
                                     return source.getServer()
                                             .getProfilePermissions(player.nameAndId())

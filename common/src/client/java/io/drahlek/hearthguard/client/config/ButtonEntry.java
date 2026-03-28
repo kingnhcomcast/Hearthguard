@@ -2,6 +2,7 @@ package io.drahlek.hearthguard.client.config;
 
 
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -32,7 +33,7 @@ public class ButtonEntry extends AbstractConfigListEntry<Void> {
     }
 
     @Override
-    public void extractRenderState(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float tickDelta) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float tickDelta) {
         super.extractRenderState(graphics, index, y, x, entryWidth, entryHeight, mouseX, mouseY, isHovered, tickDelta);
         // 1. Fix the width to match the standard boolean toggle (150px)
         int fixedWidth = 100;
