@@ -1,8 +1,10 @@
 1.0.3
-    - cmd to add/rem single mob at a time
     - cmd to "reset field" "reset-all"
     - /reload (w/o config) - do both
 
+
+bugs?
+    - is it dropping only first item in loot list or random.  setting to 100 wither skels only drop coal, never head
 
 future:
     - integrate with cinderstride, create hearthfire:

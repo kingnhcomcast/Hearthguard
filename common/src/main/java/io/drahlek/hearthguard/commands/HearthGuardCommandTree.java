@@ -16,10 +16,16 @@ public final class HearthGuardCommandTree {
                 .requires(HearthGuardCommandTree::isOpPlayer);
 
         LiteralArgumentBuilder<CommandSourceStack> configRoot = Commands.literal("config");
-        configRoot.then(Commands.literal(ReloadConfigCommand.NAME).executes(ReloadConfigCommand::run));
+        configRoot.then(Commands.literal(ConfigReloadConfigCommand.NAME).executes(ConfigReloadConfigCommand::run));
         configRoot.then(Commands.literal(ConfigShowCommand.NAME).executes(ConfigShowCommand::run));
         configRoot.then(ConfigGetCommand.register());
         configRoot.then(ConfigSetCommand.register());
+        LiteralArgumentBuilder<CommandSourceStack> mobsRoot = Commands.literal("mobs");
+        mobsRoot.then(ConfigMobsAddCommand.register());
+        mobsRoot.then(ConfigMobsRemoveCommand.register());
+
+        configRoot.then(mobsRoot);
+
         root.then(configRoot);
 
         return root;

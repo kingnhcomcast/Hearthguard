@@ -9,10 +9,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
-import static net.minecraft.network.chat.Component.literal;
 
-
-public class ReloadConfigCommand {
+public class ConfigReloadConfigCommand {
     public static final String NAME = "reload";
 
     public static int run(CommandContext<CommandSourceStack> context) {
