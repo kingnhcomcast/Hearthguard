@@ -15,6 +15,7 @@ public final class HearthGuardCommandTree {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal(Constants.MOD_ID)
                 .requires(HearthGuardCommandTree::isOpPlayer);
 
+        root.then(Commands.literal(ConfigReloadConfigCommand.NAME).executes(ConfigReloadConfigCommand::run));
         LiteralArgumentBuilder<CommandSourceStack> configRoot = Commands.literal("config");
         configRoot.then(Commands.literal(ConfigReloadConfigCommand.NAME).executes(ConfigReloadConfigCommand::run));
         configRoot.then(Commands.literal(ConfigShowCommand.NAME).executes(ConfigShowCommand::run));
