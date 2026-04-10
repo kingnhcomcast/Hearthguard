@@ -1,6 +1,3 @@
-1.0.3
-    - /reload (w/o config) - do both
-
 bugs?
     - is it dropping only first item in loot list or random.  setting to 100 wither skels only drop coal, never head
 

@@ -5,25 +5,51 @@
 
 ***
 
-## 🧠 What makes HearthGuard different?
+> Built for vanilla+ gameplay — no new blocks, no clutter, just smarter mobs.
 
+## 🧠 What makes HearthGuard different?
 *   Mobs **run away** instead of being blocked or burned
 *   Creates a more **natural, immersive survival experience**
 *   Works through behavior, not spawn prevention
 
 > Designed to feel like a natural Minecraft mechanic — no artificial rules, just creatures reacting to fire.
 
+## 🎯 Why use HearthGuard?
+
+Vanilla Minecraft treats fire as damage — not something mobs fear.
+
+HearthGuard changes that:
+
+*   Campfires become a **defensive tool**
+*   Nights feel **less binary and more tactical**
+*   Mobs behave in a way that feels **alive and reactive**
+
+> It doesn’t make the game easier — it makes it smarter.
+
+
 ***
 
 ## 🛡️ Features
-
+### 🔥 Core Behavior
 *   Hostile mobs **flee from nearby lit campfires**
-*   **Line-of-sight required** (no fleeing through walls)
-*   **Dynamic flee speeds** based on distance
-*   **Optional fear drop** (mobs may panic and drop an item once)
+*   Requires **line of sight** — no fleeing through walls
+*   💡 Mobs don’t just flee — they panic faster the closer they are to the fire.
+
+### 🎲 Immersion Details
+*   Optional **fear drop** (panic reaction, once per mob)
+*   Mobs react **naturally**, not through artificial blocking
+
+### ⚙️ Control & Compatibility
 *   **Per-mob allowlist / blocklist**
-*   Fully **configurable**
-*   Optional in-game config UI via Mod Menu + Cloth Config
+*   Full **command-based configuration**
+*   Optional UI via **Mod Menu + Cloth Config**
+*   Works on Fabric & NeoForge (1.21.1, 1.21.11, 26.x)
+
+
+## 🚧 Planned Features
+*   🔥 **Hearthfire upgrade system** 
+*   🧠 **Advanced panic behaviors** 
+*   🔗 **Cross-mod integration** (including upcoming companion mods)
 
 ***
 
@@ -71,22 +97,10 @@ Also accessible via in-game UI (if Mod Menu + Cloth Config are installed).
 
 ***
 
-## 🧩 Compatibility
-
-*   Minecraft `1.21.11`
-*   Fabric Loader `0.18.4`
-*   Fabric API `0.141.3+1.21.11`
-*   Mod Menu `17.0.0-beta.2` _(optional)_
-*   Cloth Config `21.11.153` _(optional)_
-
-***
-
 ## ⚠️ Known Issues
 
 - Datapack-defined mobs that reuse vanilla entity IDs cannot be selected independently in the mob list.
 - Slimes (and magma cubes) are not affected
-- Changing config in game to select mobs, does not apply to already existing mobs. reloading game does
-- Loot chance 100%, blazes dont seem to drop anything?
 
 ***
 
