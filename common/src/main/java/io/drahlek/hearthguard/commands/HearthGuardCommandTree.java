@@ -20,6 +20,7 @@ public final class HearthGuardCommandTree {
         configRoot.then(Commands.literal(ConfigShowCommand.NAME).executes(ConfigShowCommand::run));
         configRoot.then(ConfigGetCommand.register());
         configRoot.then(ConfigSetCommand.register());
+        configRoot.then(ConfigMobsResetCommand.register());
         LiteralArgumentBuilder<CommandSourceStack> mobsRoot = Commands.literal("mobs");
         mobsRoot.then(ConfigMobsAddCommand.register());
         mobsRoot.then(ConfigMobsRemoveCommand.register());
