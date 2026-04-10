@@ -22,9 +22,11 @@ public class HearthguardConfig {
 
     private static HearthguardConfig INSTANCE;
 
+    @ConfigSetting(value = "mode", defaultValue = "WHITELIST")
     private String mode = Mode.WHITELIST.name();
     private transient Mode modeEnum = Mode.WHITELIST;
 
+    @ConfigSetting("mobs")
     private Set<String> mobs = new HashSet<>(Set.of(
             "minecraft:zombie",
             "minecraft:zombie_villager",
@@ -38,12 +40,16 @@ public class HearthguardConfig {
             "minecraft:cave_spider",
             "minecraft:slime"
     ));
+    @ConfigSetting(value = "range", min = 3, max = 32, defaultValue = "8")
     private int range = 8;
     @SerializedName("flee_fast_speed")
-    private double fleeFastSpeed = 1.2;
+    @ConfigSetting(value = "fleeFastSpeed", min = 0.1, max = 2.0, defaultValue = "1.5")
+    private double fleeFastSpeed = 1.5;
     @SerializedName("flee_slow_speed")
+    @ConfigSetting(value = "fleeSlowSpeed", min = 0.1, max = 2.0, defaultValue = "1.0")
     private double fleeSlowSpeed = 1.0;
     @SerializedName("drop_item_chance")
+    @ConfigSetting(value = "dropItemChance", min = 0.0, max = 1.0, defaultValue = "0.25")
     private int dropItemChance = 25;
 
     // =====================

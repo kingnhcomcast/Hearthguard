@@ -297,7 +297,7 @@ public class FleeCampfireGoal extends Goal {
                 this.mob.getLootTable().ifPresent(lootTableKey -> {
                     LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(lootTableKey);
 
-                    // 3. Generate and spawn the items
+                    // 3. Generate and spawn the item
                     java.util.List<ItemStack> drops = lootTable.getRandomItems(lootParams);
                     if (drops.isEmpty()) {
                         return;

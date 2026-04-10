@@ -13,9 +13,11 @@ import static net.minecraft.network.chat.Component.literal;
 
 
 public class ReloadConfigCommand {
+    public static final String NAME = "reload";
+
     public static int run(CommandContext<CommandSourceStack> context) {
         HearthguardConfig.load();
-        context.getSource().sendSuccess(() -> literal("[HearthGuard] Config reloaded."), false);
+        CommandUtil.sendString(context,"[HearthGuard] Config reloaded.");
 
         // Sync to all players
         MinecraftServer server = context.getSource().getServer();

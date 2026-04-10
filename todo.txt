@@ -1,0 +1,5 @@
+- integrate with cinderstride, create hearthfire:
+    - greater range
+    - mobs wont attack player within range (ranged mobs like skels)
+- after first fear if mobs return they learn, stop a few blocks away and stare at player
+- more debug cmds
