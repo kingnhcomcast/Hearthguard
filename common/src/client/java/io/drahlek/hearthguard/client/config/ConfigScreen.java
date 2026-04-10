@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+//TODO this should read min/max/default from config annotations
 public class ConfigScreen {
     private static Map<String, List<EntityType<?>>> mobsByMod = null;
     private static IClientNetworking networking;
@@ -188,7 +189,7 @@ public class ConfigScreen {
         // Fast speed (double field)
         general.addEntry(
                 entryBuilder.startDoubleField(Component.literal("Flee Fast Speed"), config.getFleeFastSpeed())
-                        .setDefaultValue(1.2)
+                        .setDefaultValue(1.5)
                         .setRequirement(() -> canEdit)
                         .setSaveConsumer(value -> config.setFleeFastSpeed(Math.min(Math.max(value, 0.1), 2.0)))
                         .build()

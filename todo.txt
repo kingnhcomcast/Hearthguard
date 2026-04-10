@@ -1,5 +1,24 @@
-- integrate with cinderstride, create hearthfire:
-    - greater range
-    - mobs wont attack player within range (ranged mobs like skels)
-- after first fear if mobs return they learn, stop a few blocks away and stare at player
-- more debug cmds
+1.0.3
+    - cmd to add/rem single mob at a time
+    - cmd to "reset field" "reset-all"
+    - /reload (w/o config) - do both
+
+
+future:
+    - integrate with cinderstride, create hearthfire:
+        - greater range
+        - mobs wont attack player within range (ranged mobs like skels)
+    - after first fear if mobs return they learn, stop a few blocks away and stare at player
+
+    -    debug nearby
+             list mobs currently affected by fear
+             distance from player
+             which campfire is influencing them
+    -    debug test
+             forces nearby mobs into fear state bypasses normal check
+    -    debug radius
+            shows particles or markers around campfires
+            visualizes effective radius
+    -    info
+            mod version, other info
+    -    toggle - toggles enabled, perm/temp?

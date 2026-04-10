@@ -11,6 +11,6 @@ import java.lang.annotation.Target;
 public @interface ConfigSetting {
     String value();
     String defaultValue() default "";
-    double min() default Double.MIN_VALUE;
-    double max() default Double.MAX_VALUE;
+    double min() default Double.NEGATIVE_INFINITY;
+    double max() default Double.POSITIVE_INFINITY;
 }

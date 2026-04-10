@@ -13,6 +13,7 @@ import io.drahlek.hearthguard.networking.ConfigPayload;
 import io.drahlek.hearthguard.platform.Services;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -81,6 +82,12 @@ public class ConfigSetCommand {
     }
 
     private static int runSet(CommandContext<CommandSourceStack> context, Field field, Object parsedValue) {
+        String validationError = validateRange(field, parsedValue);
+        if (validationError != null) {
+            context.getSource().sendFailure(Component.literal(validationError));
+            return 0;
+        }
+
         HearthguardConfig config = HearthguardConfig.getInstance();
 
         setConfigValue(config, field, parsedValue);
@@ -104,6 +111,26 @@ public class ConfigSetCommand {
         } catch (Exception e) {
             throw new RuntimeException("Failed to set " + field.getName(), e);
         }
+    }
+
+    private static String validateRange(Field field, Object value) {
+        ConfigSetting setting = field.getAnnotation(ConfigSetting.class);
+        if (setting == null || !(value instanceof Number number)) {
+            return null;
+        }
+
+        double numericValue = number.doubleValue();
+        if (numericValue < setting.min() || numericValue > setting.max()) {
+            return String.format(
+                    "Value for '%s' must be between %s and %s (got %s)",
+                    setting.value(),
+                    setting.min(),
+                    setting.max(),
+                    numericValue
+            );
+        }
+
+        return null;
     }
 
     private static Method findSetter(Field field) {
