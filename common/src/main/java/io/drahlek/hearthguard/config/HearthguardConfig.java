@@ -1,9 +1,11 @@
 package io.drahlek.hearthguard.config;
 
 import com.google.gson.annotations.SerializedName;
+import io.drahlek.hearthguard.ai.FearGoalManager;
 import io.drahlek.hearthguard.Constants;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.EntityType;
 
 import java.io.InputStreamReader;
@@ -16,6 +18,7 @@ import java.util.Set;
 
 public class HearthguardConfig {
     private static Path path;
+    private static MinecraftServer activeServer;
 
     private static final com.google.gson.Gson GSON = new com.google.gson.GsonBuilder()
             .setPrettyPrinting()
@@ -66,6 +69,16 @@ public class HearthguardConfig {
     public static void setInstance(HearthguardConfig config) {
         INSTANCE = config != null ? config : new HearthguardConfig();
         INSTANCE.syncModeEnum();
+    }
+
+    public static void setActiveServer(MinecraftServer server) {
+        activeServer = server;
+    }
+
+    public static void clearActiveServer(MinecraftServer server) {
+        if (activeServer == server) {
+            activeServer = null;
+        }
     }
 
     //TODO get path from IPlatformHelper
@@ -176,6 +189,10 @@ public class HearthguardConfig {
             }
         } catch (Exception e) {
             Constants.LOG.error("Failed to save config to {}", file, e);
+        }
+
+        if (activeServer != null) {
+            FearGoalManager.refreshLoadedMonsters(activeServer);
         }
     }
 
