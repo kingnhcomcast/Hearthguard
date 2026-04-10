@@ -1,18 +1,23 @@
 # 🔥 HearthGuard
 
-> **Mobs fear the fire.**  
-> Hostile creatures panic, turn, and flee from lit campfires.
+> **Turn campfires into protection.**  
+> Hostile mobs fear the fire — they panic, turn, and flee from lit campfires.
 
 ***
 
 > Built for vanilla+ gameplay — no new blocks, no clutter, just smarter mobs.
 
-## 🧠 What makes HearthGuard different?
-*   Mobs **run away** instead of being blocked or burned
-*   Creates a more **natural, immersive survival experience**
-*   Works through behavior, not spawn prevention
+---
 
-> Designed to feel like a natural Minecraft mechanic — no artificial rules, just creatures reacting to fire.
+## 🌿 Why it feels vanilla
+
+*   Mobs **run away** instead of being blocked or burned
+*   Behavior-driven — **no artificial rules or spawn prevention**
+*   Creates a more **natural, immersive survival experience**
+
+> Designed to feel like a missing Minecraft mechanic.
+
+---
 
 ## 🎯 Why use HearthGuard?
 
@@ -20,65 +25,67 @@ Vanilla Minecraft treats fire as damage — not something mobs fear.
 
 HearthGuard changes that:
 
-*   Campfires become a **defensive tool**
+*   Campfires become a **real defensive tool**
 *   Nights feel **less binary and more tactical**
 *   Mobs behave in a way that feels **alive and reactive**
 
 > It doesn’t make the game easier — it makes it smarter.
 
-
-***
+---
 
 ## 🛡️ Features
+
 ### 🔥 Core Behavior
+*   🔥 Campfires become a **true defensive mechanic**
 *   Hostile mobs **flee from nearby lit campfires**
+*   💡 Mobs panic faster the closer they are to the fire
 *   Requires **line of sight** — no fleeing through walls
-*   💡 Mobs don’t just flee — they panic faster the closer they are to the fire.
 
 ### 🎲 Immersion Details
 *   Optional **fear drop** (panic reaction, once per mob)
 *   Mobs react **naturally**, not through artificial blocking
+*   🎭 **Multi-stage reactions** (notice → panic → flee)
 
 ### ⚙️ Control & Compatibility
 *   **Per-mob allowlist / blocklist**
-*   Full **command-based configuration**
+*   🧾 Command system for runtime configuration
 *   Optional UI via **Mod Menu + Cloth Config**
-*   Works on Fabric & NeoForge (1.21.1, 1.21.11, 26.x)
+*   ✔️ Lightweight & server-safe
+*   ✔️ Fabric & NeoForge (1.21.1, 1.21.11, 26.x)
 
+---
 
 ## 🚧 Planned Features
-*   🔥 **Hearthfire upgrade system** 
-*   🧠 **Advanced panic behaviors** 
-*   🔗 **Cross-mod integration** (including upcoming companion mods)
 
-***
+*   🔥 **Hearthfire upgrade** using rare materials (stronger, persistent fear)
+*   🧠 **Adaptive fear system** (mobs can become resistant over time)
+*   🎭 **Advanced panic behaviors**
+*   🔗 **Cross-mod integration** (including upcoming companion mods)
+*   🧾 **Expanded command system** for runtime configuration and debugging
+
+---
 
 ## 📸 Behavior in action
 
-> **Mobs don’t just stop—they react.**  
-> They panic, turn, and flee from the fire.
+> **Mobs don’t just stop — they react.**
 
-### Startled
+**Startled**  
+![Startled](https://media.forgecdn.net/attachments/1588/27/startled-png.png)
 
-**Hostile mob noticing a lit campfire.** ![Startled](https://media.forgecdn.net/attachments/1588/27/startled-png.png)
+**Jumping**  
+![Jumping](https://media.forgecdn.net/attachments/1588/25/jumping-png.png)
 
-### Jumping
+**Fleeing**  
+![Fleeing](https://media.forgecdn.net/attachments/1588/26/running-png.png)
 
-**Mob reacting in alarm.** ![Jumping](https://media.forgecdn.net/attachments/1588/25/jumping-png.png)
-
-### Fleeing
-
-**Mob running away from the campfire.** ![Fleeing](https://media.forgecdn.net/attachments/1588/26/running-png.png)
-
-***
+---
 
 ## ⚙️ Configuration
 
-HearthGuard loads its config from:
-
+Config file:
 `config/hearthguard/config.json`
 
-Also accessible via in-game UI (if Mod Menu + Cloth Config are installed).
+Also accessible via in-game UI (Mod Menu + Cloth Config).
 
 ### Settings
 
@@ -93,16 +100,25 @@ Also accessible via in-game UI (if Mod Menu + Cloth Config are installed).
 
 *   `Drop Item Chance = 0` disables fear drops
 *   Each mob can only drop once (persisted across saves)
-*   Campfire fear only runs in the Overworld
+*   Only applies in the Overworld (by design)
 
-***
+---
 
 ## ⚠️ Known Issues
 
-- Datapack-defined mobs that reuse vanilla entity IDs cannot be selected independently in the mob list.
-- Slimes (and magma cubes) are not affected
+- Datapack-defined mobs that reuse vanilla entity IDs cannot be selected independently
+- Slimes and magma cubes are not affected
 
-***
+---
+
+## 📝 Changelog
+### 1.0.3
+* Added Command system for runtime configuration
+* Support for Minecraft v26.1.2
+* Fixed: Config changes now correctly apply to previously spawned mobs
+
+### 1.0.2
+* Support for Minecraft v26.1.1
 
 ## 🔒 License
 
@@ -113,7 +129,7 @@ You are allowed to:
 *   Use this mod in modpacks
 *   Use in videos and content
 
-***
+---
 
 ## ❤️ Support
 
