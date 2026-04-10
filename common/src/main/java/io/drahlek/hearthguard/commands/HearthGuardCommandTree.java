@@ -34,10 +34,6 @@ public final class HearthGuardCommandTree {
     }
 
     private static boolean isOpPlayer(CommandSourceStack source) {
-        if (source.getPlayer() == null) {
-            return false;
-        }
-
         return source.permissions().hasPermission(Permissions.COMMANDS_ADMIN);
     }
 }
