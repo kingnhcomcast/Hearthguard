@@ -1,58 +1,91 @@
 # 🔥 HearthGuard
 
-> **Mobs fear the fire.**  
-> Hostile creatures panic, turn, and flee from lit campfires.
+> **Turn campfires into protection.**  
+> Hostile mobs fear the fire — they panic, turn, and flee from lit campfires.
 
 ***
 
-## 🧠 What makes HearthGuard different?
+> Built for vanilla+ gameplay — no new blocks, no clutter, just smarter mobs.
+
+---
+
+## 🌿 Why it feels vanilla
 
 *   Mobs **run away** instead of being blocked or burned
+*   Behavior-driven — **no artificial rules or spawn prevention**
 *   Creates a more **natural, immersive survival experience**
-*   Works through behavior, not spawn prevention
 
-> Designed to feel like a natural Minecraft mechanic — no artificial rules, just creatures reacting to fire.
+> Designed to feel like a missing Minecraft mechanic.
 
-***
+---
+
+## 🎯 Why use HearthGuard?
+
+Vanilla Minecraft treats fire as damage — not something mobs fear.
+
+HearthGuard changes that:
+
+*   Campfires become a **real defensive tool**
+*   Nights feel **less binary and more tactical**
+*   Mobs behave in a way that feels **alive and reactive**
+
+> It doesn’t make the game easier — it makes it smarter.
+
+---
 
 ## 🛡️ Features
 
+### 🔥 Core Behavior
+*   🔥 Campfires become a **true defensive mechanic**
 *   Hostile mobs **flee from nearby lit campfires**
-*   **Line-of-sight required** (no fleeing through walls)
-*   **Dynamic flee speeds** based on distance
-*   **Optional fear drop** (mobs may panic and drop an item once)
-*   **Per-mob allowlist / blocklist**
-*   Fully **configurable**
-*   Optional in-game config UI via Mod Menu + Cloth Config
+*   💡 Mobs panic faster the closer they are to the fire
+*   Requires **line of sight** — no fleeing through walls
 
-***
+### 🎲 Immersion Details
+*   Optional **fear drop** (panic reaction, once per mob)
+*   Mobs react **naturally**, not through artificial blocking
+*   🎭 **Multi-stage reactions** (notice → panic → flee)
+
+### ⚙️ Control & Compatibility
+*   **Per-mob allowlist / blocklist**
+*   🧾 Command system for runtime configuration
+*   Optional UI via **Mod Menu + Cloth Config**
+*   ✔️ Lightweight & server-safe
+*   ✔️ Fabric & NeoForge (1.21.1, 1.21.11, 26.x)
+
+---
+
+## 🚧 Planned Features
+
+*   🔥 **Hearthfire upgrade** using rare materials (stronger, persistent fear)
+*   🧠 **Adaptive fear system** (mobs can become resistant over time)
+*   🎭 **Advanced panic behaviors**
+*   🔗 **Cross-mod integration** (including upcoming companion mods)
+*   🧾 **Expanded command system** for runtime configuration and debugging
+
+---
 
 ## 📸 Behavior in action
 
-> **Mobs don’t just stop—they react.**  
-> They panic, turn, and flee from the fire.
+> **Mobs don’t just stop — they react.**
 
-### Startled
+**Startled**  
+![Startled](https://media.forgecdn.net/attachments/1588/27/startled-png.png)
 
-**Hostile mob noticing a lit campfire.** ![Startled](https://media.forgecdn.net/attachments/1588/27/startled-png.png)
+**Jumping**  
+![Jumping](https://media.forgecdn.net/attachments/1588/25/jumping-png.png)
 
-### Jumping
+**Fleeing**  
+![Fleeing](https://media.forgecdn.net/attachments/1588/26/running-png.png)
 
-**Mob reacting in alarm.** ![Jumping](https://media.forgecdn.net/attachments/1588/25/jumping-png.png)
-
-### Fleeing
-
-**Mob running away from the campfire.** ![Fleeing](https://media.forgecdn.net/attachments/1588/26/running-png.png)
-
-***
+---
 
 ## ⚙️ Configuration
 
-HearthGuard loads its config from:
-
+Config file:
 `config/hearthguard/config.json`
 
-Also accessible via in-game UI (if Mod Menu + Cloth Config are installed).
+Also accessible via in-game UI (Mod Menu + Cloth Config).
 
 ### Settings
 
@@ -67,28 +100,25 @@ Also accessible via in-game UI (if Mod Menu + Cloth Config are installed).
 
 *   `Drop Item Chance = 0` disables fear drops
 *   Each mob can only drop once (persisted across saves)
-*   Campfire fear only runs in the Overworld
+*   Only applies in the Overworld (by design)
 
-***
-
-## 🧩 Compatibility
-
-*   Minecraft `1.21.11`
-*   Fabric Loader `0.18.4`
-*   Fabric API `0.141.3+1.21.11`
-*   Mod Menu `17.0.0-beta.2` _(optional)_
-*   Cloth Config `21.11.153` _(optional)_
-
-***
+---
 
 ## ⚠️ Known Issues
 
-- Datapack-defined mobs that reuse vanilla entity IDs cannot be selected independently in the mob list.
-- Slimes (and magma cubes) are not affected
-- Changing config in game to select mobs, does not apply to already existing mobs. reloading game does
-- Loot chance 100%, blazes dont seem to drop anything?
+- Datapack-defined mobs that reuse vanilla entity IDs cannot be selected independently
+- Slimes and magma cubes are not affected
 
-***
+---
+
+## 📝 Changelog
+### 1.0.3
+* Added Command system for runtime configuration
+* Support for Minecraft v26.1.2
+* Fixed: Config changes now correctly apply to previously spawned mobs
+
+### 1.0.2
+* Support for Minecraft v26.1.1
 
 ## 🔒 License
 
@@ -99,7 +129,7 @@ You are allowed to:
 *   Use this mod in modpacks
 *   Use in videos and content
 
-***
+---
 
 ## ❤️ Support
 

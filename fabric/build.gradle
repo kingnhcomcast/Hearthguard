@@ -3,13 +3,20 @@ plugins {
     id 'fabric-loom'
 }
 configurations {
-    clientImplementation.extendsFrom(implementation)
-    clientRuntimeOnly.extendsFrom(runtimeOnly)
     commonClientJava {
         canBeResolved = true
     }
     commonClientResources {
         canBeResolved = true
+    }
+}
+
+configurations.configureEach { cfg ->
+    if (cfg.name == 'clientImplementation') {
+        cfg.extendsFrom(configurations.implementation)
+    }
+    if (cfg.name == 'clientRuntimeOnly') {
+        cfg.extendsFrom(configurations.runtimeOnly)
     }
 }
 
