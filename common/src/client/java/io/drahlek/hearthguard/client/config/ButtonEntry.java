@@ -15,13 +15,18 @@ import java.util.function.Consumer;
 
 public class ButtonEntry extends AbstractConfigListEntry<Void> {
     private final Button button;
+    private final boolean canEdit;
     private boolean isSelectAll = true;
 
     public ButtonEntry(Component text, boolean isSelectAll, boolean canEdit, Consumer<Boolean> onPress) {
         super(Component.empty(), false);
+        this.canEdit = canEdit;
         this.isSelectAll = isSelectAll;
 
         this.button = Button.builder(text, btn -> {
+            if (!this.canEdit) {
+                return;
+            }
             // Toggle the state
             this.isSelectAll = !this.isSelectAll;
             // Run the logic passed from the config screen
@@ -29,7 +34,7 @@ public class ButtonEntry extends AbstractConfigListEntry<Void> {
             // Update the button label
             btn.setMessage(Component.literal(this.isSelectAll ? "Select All" : "Deselect All"));
         }).bounds(0, 0, 150, 20).build();
-        this.button.active = canEdit;
+        this.button.active = this.canEdit;
     }
 
     @Override
@@ -44,6 +49,7 @@ public class ButtonEntry extends AbstractConfigListEntry<Void> {
 
         this.button.setX(x + entryWidth - fixedWidth - 50 );
         this.button.setY(y);
+        this.button.active = this.canEdit && isEditable();
 
         // 3. Render the button
         this.button.render(graphics, mouseX, mouseY, tickDelta);
