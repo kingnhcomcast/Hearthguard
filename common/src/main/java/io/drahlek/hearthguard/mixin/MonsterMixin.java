@@ -1,7 +1,6 @@
 package io.drahlek.hearthguard.mixin;
 
-import io.drahlek.hearthguard.ai.goal.FleeCampfireGoal;
-import io.drahlek.hearthguard.config.HearthguardConfig;
+import io.drahlek.hearthguard.ai.FearGoalManager;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.monster.Monster;
@@ -19,11 +18,6 @@ public class MonsterMixin extends PathfinderMob {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void hearthguard_addCampfireFear(CallbackInfo ci) {
-        HearthguardConfig config = HearthguardConfig.getInstance();
-        if (!config.shouldApply(getType())) {
-            return;
-        }
-
-        this.goalSelector.addGoal(1, new FleeCampfireGoal(this));
+        FearGoalManager.refreshMonster((Monster) (Object) this);
     }
 }

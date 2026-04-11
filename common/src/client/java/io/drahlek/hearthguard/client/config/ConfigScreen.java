@@ -4,7 +4,7 @@ import io.drahlek.hearthguard.config.HearthguardConfig;
 import io.drahlek.hearthguard.networking.IClientNetworking;
 import io.drahlek.hearthguard.networking.ConfigPayload;
 import io.drahlek.hearthguard.platform.services.IPlatformHelper;
-import io.drahlek.hearthguard.util.MobRules;
+import io.drahlek.hearthguard.util.MobUtil;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
@@ -12,18 +12,15 @@ import me.shedaniel.clothconfig2.gui.entries.BooleanListEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobCategory;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+//TODO this should read min/max/default from config annotations
 public class ConfigScreen {
     private static Map<String, List<EntityType<?>>> mobsByMod = null;
     private static IClientNetworking networking;
@@ -78,6 +75,13 @@ public class ConfigScreen {
         }
 
         return builder.build();
+    }
+
+    private static Map<String, List<EntityType<?>>> getMobsByMod(IPlatformHelper platformHelper) {
+        if (mobsByMod == null) {
+            mobsByMod = MobUtil.getMobsByMod();
+        }
+        return mobsByMod;
     }
 
     private static void buildMobSelectionTab(String modid, ConfigBuilder builder, Map<String, List<EntityType<?>>> mobsByMod, Set<String> selectedMobs, ConfigEntryBuilder entryBuilder, Boolean canEdit) {
@@ -136,33 +140,6 @@ public class ConfigScreen {
         modCategory.getEntries().addFirst(toggleBtn);
     }
 
-    private static Map<String, List<EntityType<?>>> getMobsByMod(IPlatformHelper platformHelper) {
-        if(mobsByMod == null) {
-            mobsByMod = new HashMap<>();
-
-            for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE) {
-                if (type.getCategory() != MobCategory.MONSTER)
-                    continue;
-
-                if (MobRules.isBossMob(type)) {
-                    continue;
-                }
-
-                ResourceLocation key = BuiltInRegistries.ENTITY_TYPE.getKey(type);
-
-                String modid = platformHelper.getModName(key.getNamespace());
-                mobsByMod.computeIfAbsent(modid, k -> new ArrayList<>()).add(type);
-            }
-
-            //sort the lists
-            for (Map.Entry<String, List<EntityType<?>>> entry : mobsByMod.entrySet()) {
-                entry.getValue().sort(Comparator.comparing(type -> type.getDescription().getString()));
-            }
-        }
-
-        return mobsByMod;
-    }
-
     private static void buildGeneralTab(ConfigBuilder builder, ConfigEntryBuilder entryBuilder, HearthguardConfig config, HearthguardConfig.Mode currentMode, Boolean canEdit) {
         ConfigCategory general = builder.getOrCreateCategory(Component.literal("General"));
 
@@ -187,7 +164,7 @@ public class ConfigScreen {
         // Fast speed (double field)
         general.addEntry(
                 entryBuilder.startDoubleField(Component.literal("Flee Fast Speed"), config.getFleeFastSpeed())
-                        .setDefaultValue(1.2)
+                        .setDefaultValue(1.5)
                         .setRequirement(() -> canEdit)
                         .setSaveConsumer(value -> config.setFleeFastSpeed(Math.min(Math.max(value, 0.1), 2.0)))
                         .build()

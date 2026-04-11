@@ -1,7 +1,7 @@
 package io.drahlek.hearthguard.config.screen;
 
 import io.drahlek.hearthguard.config.HearthguardConfig;
-import io.drahlek.hearthguard.util.MobRules;
+import io.drahlek.hearthguard.util.MobUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -120,7 +120,7 @@ public class HearthguardConfigScreen extends Screen {
             if (type.getCategory() != MobCategory.MONSTER) {
                 continue;
             }
-            if (MobRules.isBossMob(type)) {
+            if (MobUtil.isBossMob(type)) {
                 continue;
             }
 

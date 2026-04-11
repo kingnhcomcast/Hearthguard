@@ -61,4 +61,3 @@ rootProject.name = 'HearthGuard'
 include('common')
 include('fabric')
 include('neoforge')
-//include('forge')

@@ -5,7 +5,7 @@ import io.drahlek.hearthguard.config.HearthguardConfig;
 import io.drahlek.hearthguard.entity.FearDropTracker;
 import io.drahlek.hearthguard.entity.SilentStateTracker;
 import io.drahlek.hearthguard.mixin.MobInvokerMixin;
-import io.drahlek.hearthguard.util.MobRules;
+import io.drahlek.hearthguard.util.MobUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -50,7 +50,7 @@ public class FleeCampfireGoal extends Goal {
 
     @Override
     public boolean canUse() {
-        if (MobRules.isBossMob(this.mob.getType())) {
+        if (MobUtil.isBossMob(this.mob.getType())) {
             return false;
         }
 
@@ -297,11 +297,11 @@ public class FleeCampfireGoal extends Goal {
                 net.minecraft.resources.ResourceKey<net.minecraft.world.level.storage.loot.LootTable> lootTableKey = this.mob.getLootTable();
                 LootTable lootTable = serverLevel.getServer().reloadableRegistries().getLootTable(lootTableKey);
 
-                // 3. Generate and spawn the items
-                java.util.List<ItemStack> drops = lootTable.getRandomItems(lootParams);
-                if (drops.isEmpty()) {
-                    return;
-                }
+                    // 3. Generate and spawn the item
+                    java.util.List<ItemStack> drops = lootTable.getRandomItems(lootParams);
+                    if (drops.isEmpty()) {
+                        return;
+                    }
 
                 ItemStack stack = drops.getFirst().copyWithCount(1);
 

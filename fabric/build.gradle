@@ -3,8 +3,6 @@ plugins {
     id 'fabric-loom'
 }
 configurations {
-    clientImplementation.extendsFrom(implementation)
-    clientRuntimeOnly.extendsFrom(runtimeOnly)
     commonClientJava {
         canBeResolved = true
     }
