@@ -8,9 +8,11 @@ import io.drahlek.hearthguard.mixin.MobInvokerMixin;
 import io.drahlek.hearthguard.util.MobUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -18,6 +20,7 @@ import net.minecraft.world.entity.ai.util.LandRandomPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -34,6 +37,10 @@ import static io.drahlek.hearthguard.Constants.MOD_ID;
 public class FleeCampfireGoal extends Goal {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static final int CAMPFIRE_SCAN_COOLDOWN = 10;
+    private static final TagKey<Block> HEARTHFIRES = TagKey.create(
+            Registries.BLOCK,
+            Identifier.fromNamespaceAndPath("cinderstride", "hearthfires")
+    );
     private static final int STARTLED_TIME = 20;    //how long to stay startled
     private static final int RECOVERY_TIME = 20;    //how long to wait after fleeing before mob can be started
 
@@ -139,7 +146,7 @@ public class FleeCampfireGoal extends Goal {
     private BlockPos findNearestLitCampfire() {
         BlockPos mobPos = mob.blockPosition();
         Level level = mob.level();
-        int r = getStartleDistance();
+        int r = getMaxStartleDistance();
         BlockPos nearestPos = null;
         double nearestDistanceSqr = Double.MAX_VALUE;
 
@@ -151,8 +158,10 @@ public class FleeCampfireGoal extends Goal {
 
             if (state.getBlock() instanceof CampfireBlock
                     && state.getValue(CampfireBlock.LIT)) {
+                int startleDistance = getStartleDistance(state);
                 double distanceSqr = pos.distSqr(mobPos);
-                if (distanceSqr < nearestDistanceSqr) {
+                if (distanceSqr <= (double) startleDistance * startleDistance
+                        && distanceSqr < nearestDistanceSqr) {
                     nearestDistanceSqr = distanceSqr;
                     nearestPos = pos.immutable();
                 }
@@ -436,7 +445,24 @@ public class FleeCampfireGoal extends Goal {
     }
 
     private int getStartleDistance() {
-        return HearthguardConfig.getInstance().getRange();
+        if (nearestFire == null) {
+            return getMaxStartleDistance();
+        }
+
+        return getStartleDistance(this.mob.level().getBlockState(nearestFire));
+    }
+
+    private int getStartleDistance(BlockState state) {
+        int range = HearthguardConfig.getInstance().getRange();
+        if (state.is(HEARTHFIRES)) {
+            return (int) Math.ceil(range * 1.5D);
+        }
+
+        return range;
+    }
+
+    private int getMaxStartleDistance() {
+        return (int) Math.ceil(HearthguardConfig.getInstance().getRange() * 1.5D);
     }
 
     private int getDangerDistance() {
