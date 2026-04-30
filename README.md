@@ -9,6 +9,9 @@
 
 ---
 
+> Works with [CinderStride](https://www.curseforge.com/minecraft/mc-mods/cinderstride) — upgrade campfires into powerful Hearthfires that repel mobs even more effectively.
+
+---
 ## 🌿 Why it feels vanilla
 
 *   Mobs **run away** instead of being blocked or burned
@@ -53,14 +56,15 @@ HearthGuard changes that:
 *   ✔️ Lightweight & server-safe
 *   ✔️ Fabric & NeoForge (1.21.1, 1.21.11, 26.x)
 
+### 🔥 Hearthfire ([CinderStride](https://www.curseforge.com/minecraft/mc-mods/cinderstride) Integration)
+*   Upgrade campfires into Hearthfires using CinderStride
+*   +50% fear radius
 ---
 
 ## 🚧 Planned Features
 
-*   🔥 **Hearthfire upgrade** using rare materials (stronger, persistent fear)
 *   🧠 **Adaptive fear system** (mobs can become resistant over time)
 *   🎭 **Advanced panic behaviors**
-*   🔗 **Cross-mod integration** (including upcoming companion mods)
 *   🧾 **Expanded command system** for runtime configuration and debugging
 
 ---
@@ -112,6 +116,8 @@ Also accessible via in-game UI (Mod Menu + Cloth Config).
 ---
 
 ## 📝 Changelog
+### 1.1.0
+* Added integration with [CinderStride](https://www.curseforge.com/minecraft/mc-mods/cinderstride) Hearthfires now increase mob fear radius by 50%.
 ### 1.0.3
 * Added Command system for runtime configuration
 * Support for Minecraft v26.1.2
