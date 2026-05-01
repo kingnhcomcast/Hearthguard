@@ -39,7 +39,7 @@ public class FleeCampfireGoal extends Goal {
     private static final int CAMPFIRE_SCAN_COOLDOWN = 10;
     private static final TagKey<Block> HEARTHFIRES = TagKey.create(
             Registries.BLOCK,
-            Identifier.fromNamespaceAndPath("cinderstride", "hearthfires")
+            ResourceLocation.fromNamespaceAndPath("cinderstride", "hearthfires")
     );
     private static final int STARTLED_TIME = 20;    //how long to stay startled
     private static final int RECOVERY_TIME = 20;    //how long to wait after fleeing before mob can be started
