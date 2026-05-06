@@ -5,6 +5,7 @@ import io.drahlek.hearthguard.entity.SilentStateTracker;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Slime;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -68,7 +69,7 @@ public abstract class LivingEntityFearDropMixin implements FearDropTracker, Sile
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
     private void hearthguard$readFearDropFlag(CompoundTag input, CallbackInfo ci) {
-        if (((Object) this) instanceof net.minecraft.world.entity.monster.Monster) {
+       if (((Object) this) instanceof net.minecraft.world.entity.monster.Monster) {
             this.hearthguard$droppedFearItem = input.getBoolean(HEARTHGUARD_DROPPED_FEAR_ITEM_TAG);
             this.hearthguard$originalSilent = input.getBoolean(HEARTHGUARD_ORIGINAL_SILENT_TAG);
             this.hearthguard$forcedSilent = input.getBoolean(HEARTHGUARD_FORCED_SILENT_TAG);
@@ -78,5 +79,12 @@ public abstract class LivingEntityFearDropMixin implements FearDropTracker, Sile
                 this.hearthguard$forcedSilent = false;
             }
         }
+    }
+
+    @Unique
+    private boolean hearthguard$tracksFearState() {
+        Object entity = this;
+        return entity instanceof net.minecraft.world.entity.monster.Monster
+                || entity instanceof Slime;
     }
 }

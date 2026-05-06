@@ -6,7 +6,9 @@
     "LivingEntityFearDropMixin",
     "MobAccessorMixin",
     "MobInvokerMixin",
-    "MonsterMixin"
+    "MonsterMixin",
+    "SlimeMixin",
+    "SlimeMoveControlInvokerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
