@@ -4,6 +4,7 @@ import io.drahlek.hearthguard.entity.FearDropTracker;
 import io.drahlek.hearthguard.entity.SilentStateTracker;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import org.spongepowered.asm.mixin.Mixin;
@@ -60,7 +61,7 @@ public abstract class LivingEntityFearDropMixin implements FearDropTracker, Sile
 
     @Inject(method = "addAdditionalSaveData", at = @At("TAIL"))
     private void hearthguard$saveFearDropFlag(ValueOutput output, CallbackInfo ci) {
-        if (((Object) this) instanceof net.minecraft.world.entity.monster.Monster) {
+        if (hearthguard$tracksFearState()) {
             output.putBoolean(HEARTHGUARD_DROPPED_FEAR_ITEM_TAG, this.hearthguard$droppedFearItem);
             output.putBoolean(HEARTHGUARD_ORIGINAL_SILENT_TAG, this.hearthguard$originalSilent);
             output.putBoolean(HEARTHGUARD_FORCED_SILENT_TAG, this.hearthguard$forcedSilent);
@@ -69,7 +70,7 @@ public abstract class LivingEntityFearDropMixin implements FearDropTracker, Sile
 
     @Inject(method = "readAdditionalSaveData", at = @At("TAIL"))
     private void hearthguard$readFearDropFlag(ValueInput input, CallbackInfo ci) {
-        if (((Object) this) instanceof net.minecraft.world.entity.monster.Monster) {
+        if (hearthguard$tracksFearState()) {
             this.hearthguard$droppedFearItem = input.getBooleanOr(HEARTHGUARD_DROPPED_FEAR_ITEM_TAG, false);
             this.hearthguard$originalSilent = input.getBooleanOr(HEARTHGUARD_ORIGINAL_SILENT_TAG, false);
             this.hearthguard$forcedSilent = input.getBooleanOr(HEARTHGUARD_FORCED_SILENT_TAG, false);
@@ -79,5 +80,12 @@ public abstract class LivingEntityFearDropMixin implements FearDropTracker, Sile
                 this.hearthguard$forcedSilent = false;
             }
         }
+    }
+
+    @Unique
+    private boolean hearthguard$tracksFearState() {
+        Object entity = this;
+        return entity instanceof net.minecraft.world.entity.monster.Monster
+                || entity instanceof Slime;
     }
 }
